@@ -495,8 +495,6 @@ export default function AuthScreen() {
               </View>
             )}
 
-            
-
             <TouchableOpacity
               style={[
                 styles.submitButton,
@@ -737,24 +735,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: "center",
   },
-  devModeButton: {
-    backgroundColor: "#f0f0f0",
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 16,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#ddd",
-  },
-  devModeActive: {
-    backgroundColor: "#e8f5e8",
-    borderColor: "#4caf50",
-  },
-  devModeText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#666",
-  },
+
   submitButton: {
     borderRadius: 15,
     overflow: "hidden",
