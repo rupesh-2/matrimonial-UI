@@ -26,25 +26,26 @@ export class MessagesService {
     return response.data;
   }
 
-  static async sendMessage(data: SendMessageData): Promise<any> {
+  static async sendMessage(
+    data: SendMessageData
+  ): Promise<{ message: string; sent_message: any }> {
     const response = await apiClient.post(API_ENDPOINTS.MESSAGES.SEND, data);
     return response.data;
   }
 
-  static async markAsRead(messageId: number): Promise<void> {
-    await apiClient.put(`/api/messages/${messageId}/read`);
+  static async markAsRead(userId: number): Promise<{ message: string }> {
+    const response = await apiClient.post(`/api/messages/${userId}/read`);
+    return response.data;
   }
 
-  static async markConversationAsRead(userId: number): Promise<void> {
-    await apiClient.put(`/api/messages/conversation/${userId}/read`);
+  static async deleteMessage(messageId: number): Promise<{ message: string }> {
+    const response = await apiClient.delete(`/api/messages/${messageId}`);
+    return response.data;
   }
 
-  static async deleteMessage(messageId: number): Promise<void> {
-    await apiClient.delete(`/api/messages/${messageId}`);
-  }
-
-  static async deleteConversation(userId: number): Promise<void> {
-    await apiClient.delete(`/api/messages/conversation/${userId}`);
+  static async getUnreadCount(): Promise<{ unread_count: number }> {
+    const response = await apiClient.get("/api/messages/unread-count");
+    return response.data;
   }
 }
 

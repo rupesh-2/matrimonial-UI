@@ -10,7 +10,7 @@ interface LikesState {
   isLoading: boolean;
   error: string | null;
   hasMore: boolean;
-  likedUsers: Set<number>; // Track which users are liked
+  likedUserIds: Set<number>;
 }
 
 interface LikesStore extends LikesState {
@@ -24,8 +24,6 @@ interface LikesStore extends LikesState {
   refresh: () => Promise<void>;
   clearError: () => void;
   clearLikes: () => void;
-  addLikedUser: (userId: number) => void;
-  removeLikedUser: (userId: number) => void;
 }
 
 export const useLikesStore = create<LikesStore>((set, get) => ({
@@ -36,27 +34,23 @@ export const useLikesStore = create<LikesStore>((set, get) => ({
   isLoading: false,
   error: null,
   hasMore: true,
-  likedUsers: new Set(),
+  likedUserIds: new Set(),
 
   getLikes: async (page = 1) => {
     set({ isLoading: true, error: null });
     try {
       const response = await LikesService.getLikes(page);
-      const likedUserIds = new Set(
-        response.likes.map((like) => like.liked_user_id)
-      );
+      const newLikes =
+        page === 1 ? response.likes : [...get().likes, ...response.likes];
+      const likedUserIds = new Set(newLikes.map((like) => like.liked_user_id));
 
       set({
-        likes:
-          page === 1 ? response.likes : [...get().likes, ...response.likes],
+        likes: newLikes,
         currentPage: response.current_page,
         totalPages: response.last_page,
         total: response.total,
         hasMore: response.current_page < response.last_page,
-        likedUsers:
-          page === 1
-            ? likedUserIds
-            : new Set([...get().likedUsers, ...likedUserIds]),
+        likedUserIds,
         isLoading: false,
       });
     } catch (error: any) {
@@ -73,8 +67,11 @@ export const useLikesStore = create<LikesStore>((set, get) => ({
       const response = await LikesService.likeUser(userId);
 
       // Add to liked users set
+      const newLikedUserIds = new Set(get().likedUserIds);
+      newLikedUserIds.add(userId);
+
       set({
-        likedUsers: new Set([...get().likedUsers, userId]),
+        likedUserIds: newLikedUserIds,
         isLoading: false,
       });
 
@@ -97,11 +94,17 @@ export const useLikesStore = create<LikesStore>((set, get) => ({
       await LikesService.unlikeUser(userId);
 
       // Remove from liked users set
-      const newLikedUsers = new Set(get().likedUsers);
-      newLikedUsers.delete(userId);
+      const newLikedUserIds = new Set(get().likedUserIds);
+      newLikedUserIds.delete(userId);
+
+      // Remove from likes array
+      const newLikes = get().likes.filter(
+        (like) => like.liked_user_id !== userId
+      );
 
       set({
-        likedUsers: newLikedUsers,
+        likes: newLikes,
+        likedUserIds: newLikedUserIds,
         isLoading: false,
       });
     } catch (error: any) {
@@ -118,6 +121,7 @@ export const useLikesStore = create<LikesStore>((set, get) => ({
       const response = await LikesService.checkIfLiked(userId);
       return response.is_liked;
     } catch (error) {
+      // If check fails, return false
       return false;
     }
   },
@@ -145,20 +149,8 @@ export const useLikesStore = create<LikesStore>((set, get) => ({
       totalPages: 1,
       total: 0,
       hasMore: true,
-      likedUsers: new Set(),
+      likedUserIds: new Set(),
     });
-  },
-
-  addLikedUser: (userId: number) => {
-    set({
-      likedUsers: new Set([...get().likedUsers, userId]),
-    });
-  },
-
-  removeLikedUser: (userId: number) => {
-    const newLikedUsers = new Set(get().likedUsers);
-    newLikedUsers.delete(userId);
-    set({ likedUsers: newLikedUsers });
   },
 }));
 

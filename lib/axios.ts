@@ -1,6 +1,6 @@
-import { API_BASE_URL } from "@constants/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
+import { API_BASE_URL } from "../constants/api";
 
 const TOKEN_KEY = "auth_token";
 

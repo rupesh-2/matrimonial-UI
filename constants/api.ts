@@ -1,4 +1,22 @@
-export const API_BASE_URL = "http://127.0.0.1:8000";
+import { Platform } from "react-native";
+
+// Use different URLs for different environments
+const isDevelopment = __DEV__;
+const isAndroid = Platform.OS === "android";
+
+// For Android emulator, use 10.0.2.2 instead of 127.0.0.1
+const getBaseUrl = () => {
+  if (isDevelopment) {
+    if (isAndroid) {
+      return "http://10.0.2.2:8000"; // Android emulator
+    } else {
+      return "http://127.0.0.1:8000"; // iOS simulator or web
+    }
+  }
+  return "https://your-production-api.com"; // Production
+};
+
+export const API_BASE_URL = getBaseUrl();
 
 export const API_ENDPOINTS = {
   // Authentication
