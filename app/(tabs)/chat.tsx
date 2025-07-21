@@ -77,12 +77,15 @@ export default function ChatList() {
 
   // Filter chats based on search query
   const filteredChats = searchQuery
-    ? (conversations || []).filter((conversation) =>
-        (conversation.other_user?.name || "")
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase())
+    ? (Array.isArray(conversations) ? conversations : []).filter(
+        (conversation) =>
+          (conversation?.other_user?.name || "")
+            .toLowerCase()
+            .includes((searchQuery || "").toLowerCase())
       )
-    : conversations || [];
+    : Array.isArray(conversations)
+    ? conversations
+    : [];
 
   // Format timestamp
   const formatTime = (timestamp) => {
@@ -105,74 +108,53 @@ export default function ChatList() {
   };
 
   // Render a chat preview item
-  const renderChatItem = ({ item }) => {
-    const { other_user, last_message, unread_count } = item;
-    const isUnread = unread_count > 0;
-    const isLastMessageFromMe = last_message.sender_id === user?.id;
+  const renderChatItem = ({ item }: { item: Conversation }) => {
+    try {
+      const { other_user, last_message, unread_count } = item;
 
-    return (
-      <Pressable
-        style={[styles.chatItem, isDark ? styles.chatItemDark : null]}
-        android_ripple={{
-          color: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
-        }}
-      >
-        <View style={styles.avatarContainer}>
-          <Image
-            source={{
-              uri:
-                other_user.photos[0] ||
-                `https://randomuser.me/api/portraits/${
-                  other_user.gender === "female" ? "women" : "men"
-                }/${other_user.id}.jpg`,
-            }}
-            style={styles.avatar}
-            contentFit="cover"
-          />
-          {other_user.is_online && <View style={styles.onlineIndicator} />}
-        </View>
-
-        <View style={styles.chatInfo}>
-          <View style={styles.chatHeader}>
-            <ThemedText style={styles.userName}>
-              {other_user.name}, {other_user.age}
-            </ThemedText>
-            <ThemedText style={styles.timestamp}>
-              {formatTime(last_message.created_at)}
-            </ThemedText>
+      return (
+        <Pressable
+          style={styles.chatItem}
+          onPress={() => handleChatPress(item)}
+        >
+          <View style={styles.avatarContainer}>
+            <Image
+              source={{
+                uri:
+                  (other_user?.photos && other_user.photos[0]) ||
+                  `https://randomuser.me/api/portraits/${
+                    other_user?.gender === "female" ? "women" : "men"
+                  }/${other_user?.id || 1}.jpg`,
+              }}
+              style={styles.avatar}
+              contentFit="cover"
+            />
+            {other_user?.is_online && <View style={styles.onlineIndicator} />}
           </View>
-
-          <View style={styles.lastMessageContainer}>
-            <View style={styles.lastMessageContent}>
-              {isLastMessageFromMe && (
-                <ThemedText style={styles.sentByMe}>You: </ThemedText>
-              )}
-              <ThemedText
-                style={[
-                  styles.lastMessageText,
-                  isUnread ? styles.unreadMessage : null,
-                ]}
-                numberOfLines={1}
-              >
-                {last_message.content}
+          <View style={styles.chatContent}>
+            <View style={styles.chatHeader}>
+              <ThemedText style={styles.userName}>
+                {other_user?.name || "Unknown"}, {other_user?.age || 0}
+              </ThemedText>
+              <ThemedText style={styles.timestamp}>
+                {formatTimestamp(last_message?.created_at)}
               </ThemedText>
             </View>
-
-            {isUnread && (
-              <View style={styles.unreadBadge}>
-                <ThemedText style={styles.unreadCount}>
-                  {unread_count}
-                </ThemedText>
-              </View>
-            )}
-
-            {!isUnread && !isLastMessageFromMe && last_message.is_read && (
-              <Ionicons name="checkmark-done" size={16} color="#5DADE2" />
-            )}
+            <ThemedText style={styles.lastMessage} numberOfLines={1}>
+              {last_message?.content || "No messages yet"}
+            </ThemedText>
           </View>
-        </View>
-      </Pressable>
-    );
+          {(unread_count || 0) > 0 && (
+            <View style={styles.unreadBadge}>
+              <ThemedText style={styles.unreadCount}>{unread_count}</ThemedText>
+            </View>
+          )}
+        </Pressable>
+      );
+    } catch (error) {
+      console.error("Error rendering chat item:", error);
+      return null;
+    }
   };
 
   // Render loading state
@@ -251,17 +233,16 @@ export default function ChatList() {
           <TextInput
             style={styles.searchInput}
             placeholder="Search conversations..."
-            placeholderTextColor={isDark ? "#ccc" : "#666"}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
+            placeholderTextColor="#999"
+            value={searchQuery || ""}
+            onChangeText={(text) => setSearchQuery(text || "")}
           />
-          {searchQuery.length > 0 && (
-            <Pressable onPress={() => setSearchQuery("")}>
-              <Ionicons
-                name="close-circle"
-                size={20}
-                color={isDark ? "#ccc" : "#666"}
-              />
+          {(searchQuery || "").length > 0 && (
+            <Pressable
+              style={styles.clearButton}
+              onPress={() => setSearchQuery("")}
+            >
+              <Ionicons name="close-circle" size={20} color="#999" />
             </Pressable>
           )}
         </View>
@@ -274,18 +255,26 @@ export default function ChatList() {
         renderError()
       ) : filteredChats.length > 0 ? (
         <FlatList
-          data={filteredChats}
+          data={Array.isArray(filteredChats) ? filteredChats : []}
           renderItem={renderChatItem}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) =>
+            item?.id?.toString() || Math.random().toString()
+          }
           contentContainerStyle={styles.chatList}
-          showsVerticalScrollIndicator={false}
           refreshControl={
-            <RefreshControl
-              refreshing={isLoading}
-              onRefresh={handleRefresh}
-              colors={["#FF6B8B"]}
-              tintColor="#FF6B8B"
-            />
+            <RefreshControl refreshing={isLoading} onRefresh={handleRefresh} />
+          }
+          ListEmptyComponent={
+            !isLoading ? (
+              <View style={styles.emptyContainer}>
+                <ThemedText style={styles.emptyText}>
+                  No conversations yet
+                </ThemedText>
+                <ThemedText style={styles.emptySubtext}>
+                  Start matching to see your conversations here
+                </ThemedText>
+              </View>
+            ) : null
           }
         />
       ) : (
@@ -523,5 +512,8 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     justifyContent: "center",
     alignItems: "center",
+  },
+  clearButton: {
+    padding: 4,
   },
 });

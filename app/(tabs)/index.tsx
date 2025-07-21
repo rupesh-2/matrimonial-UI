@@ -39,8 +39,18 @@ export default function HomeScreen() {
     });
   }, []);
 
-  // Use actual recommendations from API
-  const displayRecommendations = recommendations || [];
+  // Use actual recommendations from API with safety checks
+  const displayRecommendations = Array.isArray(recommendations)
+    ? recommendations
+    : [];
+
+  // Debug logging
+  console.log("Recommendations state:", {
+    recommendations,
+    isArray: Array.isArray(recommendations),
+    length: recommendations?.length,
+    displayLength: displayRecommendations.length,
+  });
 
   // Handle like/unlike actions
   const handleLike = async (userId: number) => {
@@ -121,25 +131,31 @@ export default function HomeScreen() {
           />
         }
       >
-        {/* Error Display */}
+        {/* Error State */}
         {error && (
           <View style={styles.errorContainer}>
-            <ThemedText style={styles.errorText}>{error}</ThemedText>
+            <ThemedText style={styles.errorText}>
+              {error || "An error occurred"}
+            </ThemedText>
+            <Pressable style={styles.retryButton} onPress={handleRefresh}>
+              <ThemedText style={styles.retryText}>Retry</ThemedText>
+            </Pressable>
           </View>
         )}
 
         {/* Loading State */}
-        {isLoading && (!recommendations || recommendations.length === 0) && (
-          <View style={styles.loadingContainer}>
-            <ThemedText style={styles.loadingText}>
-              Loading recommendations...
-            </ThemedText>
-          </View>
-        )}
+        {isLoading === true &&
+          (!Array.isArray(recommendations) || recommendations.length === 0) && (
+            <View style={styles.loadingContainer}>
+              <ThemedText style={styles.loadingText}>
+                Loading recommendations...
+              </ThemedText>
+            </View>
+          )}
 
         {/* Empty State */}
         {!isLoading &&
-          (!recommendations || recommendations.length === 0) &&
+          (!Array.isArray(recommendations) || recommendations.length === 0) &&
           !error && (
             <View style={styles.emptyContainer}>
               <ThemedText style={styles.emptyText}>
@@ -191,49 +207,66 @@ export default function HomeScreen() {
             </View>
 
             <View style={styles.matchCarousel}>
-              {displayRecommendations.slice(0, 3).map((recommendation) => (
-                <Pressable key={recommendation.id} style={styles.carouselItem}>
-                  <Image
-                    source={{
-                      uri:
-                        (recommendation.photos && recommendation.photos[0]) ||
-                        `https://randomuser.me/api/portraits/${
-                          recommendation.gender === "female" ? "women" : "men"
-                        }/${recommendation.id}.jpg`,
-                    }}
-                    style={styles.carouselImage}
-                    contentFit="cover"
-                  />
-                  <BlurView
-                    intensity={80}
-                    style={styles.carouselInfo}
-                    tint={isDark ? "dark" : "light"}
-                  >
-                    <ThemedText style={styles.carouselName}>
-                      {recommendation.name || "Unknown"},{" "}
-                      {recommendation.age || 0}
-                    </ThemedText>
-                    <ThemedText style={styles.carouselLocation}>
-                      {recommendation.location || "Unknown"},{" "}
-                      {recommendation.distance || 0} mi
-                    </ThemedText>
-                  </BlurView>
-                  <View style={styles.matchActions}>
-                    <Pressable
-                      style={[styles.actionButton, styles.declineButton]}
-                      onPress={() => handleUnlike(recommendation.id)}
-                    >
-                      <Ionicons name="close" size={22} color="#FF5C5C" />
-                    </Pressable>
-                    <Pressable
-                      style={[styles.actionButton, styles.likeButton]}
-                      onPress={() => handleLike(recommendation.id)}
-                    >
-                      <Ionicons name="heart" size={22} color="#FF6B8B" />
-                    </Pressable>
-                  </View>
-                </Pressable>
-              ))}
+              {(() => {
+                try {
+                  return displayRecommendations
+                    .slice(0, 3)
+                    .map((recommendation) => (
+                      <Pressable
+                        key={recommendation?.id || Math.random()}
+                        style={styles.carouselItem}
+                      >
+                        <Image
+                          source={{
+                            uri:
+                              (recommendation?.photos &&
+                                recommendation.photos[0]) ||
+                              `https://randomuser.me/api/portraits/${
+                                recommendation?.gender === "female"
+                                  ? "women"
+                                  : "men"
+                              }/${recommendation?.id || 1}.jpg`,
+                          }}
+                          style={styles.carouselImage}
+                          contentFit="cover"
+                        />
+                        <BlurView
+                          intensity={80}
+                          style={styles.carouselInfo}
+                          tint={isDark ? "dark" : "light"}
+                        >
+                          <ThemedText style={styles.carouselName}>
+                            {recommendation?.name || "Unknown"},{" "}
+                            {recommendation?.age || 0}
+                          </ThemedText>
+                          <ThemedText style={styles.carouselLocation}>
+                            {recommendation?.location || "Unknown"},{" "}
+                            {recommendation?.distance || 0} mi
+                          </ThemedText>
+                        </BlurView>
+                        <View style={styles.matchActions}>
+                          <Pressable
+                            style={[styles.actionButton, styles.declineButton]}
+                            onPress={() =>
+                              handleUnlike(recommendation?.id || 0)
+                            }
+                          >
+                            <Ionicons name="close" size={22} color="#FF5C5C" />
+                          </Pressable>
+                          <Pressable
+                            style={[styles.actionButton, styles.likeButton]}
+                            onPress={() => handleLike(recommendation?.id || 0)}
+                          >
+                            <Ionicons name="heart" size={22} color="#FF6B8B" />
+                          </Pressable>
+                        </View>
+                      </Pressable>
+                    ));
+                } catch (error) {
+                  console.error("Error rendering carousel:", error);
+                  return null;
+                }
+              })()}
             </View>
           </LinearGradient>
         </View>
@@ -282,51 +315,66 @@ export default function HomeScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.discoverScroll}
         >
-          {displayRecommendations.slice(3, 8).map((recommendation) => (
-            <Pressable key={recommendation.id} style={styles.discoverCard}>
-              <Image
-                source={{
-                  uri:
-                    (recommendation.photos && recommendation.photos[0]) ||
-                    `https://randomuser.me/api/portraits/${
-                      recommendation.gender === "female" ? "women" : "men"
-                    }/${recommendation.id}.jpg`,
-                }}
-                style={styles.discoverImage}
-                contentFit="cover"
-              />
-              <LinearGradient
-                colors={["transparent", "rgba(0,0,0,0.7)"]}
-                style={styles.discoverGradient}
-              >
-                <View style={styles.discoverInfo}>
-                  <ThemedText style={styles.discoverName}>
-                    {recommendation.name || "Unknown"},{" "}
-                    {recommendation.age || 0}
-                  </ThemedText>
-                  <View style={styles.discoverDetails}>
-                    <View style={styles.discoverDetail}>
-                      <Ionicons name="location" size={12} color="#fff" />
-                      <ThemedText style={styles.discoverDetailText}>
-                        {recommendation.location || "Unknown"}
+          {(() => {
+            try {
+              return displayRecommendations
+                .slice(3, 8)
+                .map((recommendation) => (
+                  <Pressable
+                    key={recommendation?.id || Math.random()}
+                    style={styles.discoverCard}
+                  >
+                    <Image
+                      source={{
+                        uri:
+                          (recommendation?.photos &&
+                            recommendation.photos[0]) ||
+                          `https://randomuser.me/api/portraits/${
+                            recommendation?.gender === "female"
+                              ? "women"
+                              : "men"
+                          }/${recommendation?.id || 1}.jpg`,
+                      }}
+                      style={styles.discoverImage}
+                      contentFit="cover"
+                    />
+                    <LinearGradient
+                      colors={["transparent", "rgba(0,0,0,0.7)"]}
+                      style={styles.discoverGradient}
+                    >
+                      <View style={styles.discoverInfo}>
+                        <ThemedText style={styles.discoverName}>
+                          {recommendation?.name || "Unknown"},{" "}
+                          {recommendation?.age || 0}
+                        </ThemedText>
+                        <View style={styles.discoverDetails}>
+                          <View style={styles.discoverDetail}>
+                            <Ionicons name="location" size={12} color="#fff" />
+                            <ThemedText style={styles.discoverDetailText}>
+                              {recommendation?.location || "Unknown"}
+                            </ThemedText>
+                          </View>
+                          <View style={styles.discoverDetail}>
+                            <Ionicons name="briefcase" size={12} color="#fff" />
+                            <ThemedText style={styles.discoverDetailText}>
+                              {recommendation?.occupation || "Professional"}
+                            </ThemedText>
+                          </View>
+                        </View>
+                      </View>
+                    </LinearGradient>
+                    <View style={styles.compatibilityBadge}>
+                      <ThemedText style={styles.compatibilityText}>
+                        {Math.round(recommendation.compatibility_score)}% Match
                       </ThemedText>
                     </View>
-                    <View style={styles.discoverDetail}>
-                      <Ionicons name="briefcase" size={12} color="#fff" />
-                      <ThemedText style={styles.discoverDetailText}>
-                        {recommendation.occupation || "Professional"}
-                      </ThemedText>
-                    </View>
-                  </View>
-                </View>
-              </LinearGradient>
-              <View style={styles.compatibilityBadge}>
-                <ThemedText style={styles.compatibilityText}>
-                  {Math.round(recommendation.compatibility_score)}% Match
-                </ThemedText>
-              </View>
-            </Pressable>
-          ))}
+                  </Pressable>
+                ));
+            } catch (error) {
+              console.error("Error rendering discover section:", error);
+              return null;
+            }
+          })()}
         </ScrollView>
 
         {/* Recent Activity */}
@@ -765,5 +813,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#999",
     textAlign: "center",
+  },
+  retryButton: {
+    marginTop: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    backgroundColor: "#FF6B8B",
+    borderRadius: 8,
+    alignSelf: "center",
+  },
+  retryText: {
+    color: "white",
+    fontSize: 14,
+    fontWeight: "bold",
   },
 });
