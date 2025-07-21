@@ -1,11 +1,17 @@
 import { ThemedText } from "@/components/ThemedText";
+import { useAuthStore } from "@domains/auth/hooks/useAuth";
+import { useLikesStore } from "@domains/likes/hooks/useLikes";
+import { useMatchmakingStore } from "@domains/matchmaking/hooks/useMatchmaking";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
+import { useEffect } from "react";
 import {
+  Alert,
   Dimensions,
   Pressable,
+  RefreshControl,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -27,7 +33,10 @@ export default function HomeScreen() {
 
   // Load recommendations on component mount
   useEffect(() => {
-    getRecommendations(10, 1);
+    getRecommendations(10, 1).catch(() => {
+      // If API fails, we'll show empty state or fallback data
+      console.log("API not available, showing empty state");
+    });
   }, []);
 
   // Handle like/unlike actions
@@ -121,6 +130,18 @@ export default function HomeScreen() {
           <View style={styles.loadingContainer}>
             <ThemedText style={styles.loadingText}>
               Loading recommendations...
+            </ThemedText>
+          </View>
+        )}
+
+        {/* Empty State */}
+        {!isLoading && recommendations.length === 0 && !error && (
+          <View style={styles.emptyContainer}>
+            <ThemedText style={styles.emptyText}>
+              No recommendations available
+            </ThemedText>
+            <ThemedText style={styles.emptySubtext}>
+              Check back later for new matches
             </ThemedText>
           </View>
         )}
@@ -705,5 +726,20 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 16,
     color: "#666",
+  },
+  emptyContainer: {
+    padding: 40,
+    alignItems: "center",
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#666",
+    marginBottom: 8,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: "#999",
+    textAlign: "center",
   },
 });

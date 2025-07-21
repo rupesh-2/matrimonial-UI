@@ -132,7 +132,7 @@ export default function AuthScreen() {
           password: formData.password,
         });
         // Navigate to main app after successful login
-        router.replace("/(tabs)");
+        router.replace("/(tabs)/");
       } else {
         await register({
           name: formData.fullName,
@@ -141,7 +141,7 @@ export default function AuthScreen() {
           password_confirmation: formData.confirmPassword,
         });
         // Navigate to main app after successful registration
-        router.replace("/(tabs)");
+        router.replace("/(tabs)/");
       }
     } catch (error: any) {
       // Show specific error message for network issues

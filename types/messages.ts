@@ -11,9 +11,21 @@ export interface Message {
 
 export interface Conversation {
   id: number;
-  user_id: number;
-  other_user: UserProfile;
-  last_message: Message;
+  other_user: {
+    id: number;
+    name: string;
+    age: number;
+    gender: "male" | "female";
+    photos: string[];
+    is_online: boolean;
+  };
+  last_message: {
+    id: number;
+    content: string;
+    sender_id: number;
+    created_at: string;
+    is_read: boolean;
+  };
   unread_count: number;
   created_at: string;
   updated_at: string;
@@ -26,15 +38,17 @@ export interface SendMessageData {
 }
 
 export interface MessagesResponse {
-  messages: Message[];
-  total: number;
+  data: Message[];
   current_page: number;
   last_page: number;
+  total: number;
+  per_page: number;
 }
 
 export interface ConversationsResponse {
-  conversations: Conversation[];
-  total: number;
+  data: Conversation[];
   current_page: number;
   last_page: number;
+  total: number;
+  per_page: number;
 }

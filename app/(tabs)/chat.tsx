@@ -62,7 +62,10 @@ export default function ChatList() {
   const { user } = useAuthStore();
 
   useEffect(() => {
-    getConversations(1);
+    getConversations(1).catch(() => {
+      // If API fails, we'll show empty state
+      console.log("API not available, showing empty conversations");
+    });
   }, []);
 
   const handleRefresh = () => {
