@@ -1,6 +1,8 @@
 "use client";
 
 import { ThemedText } from "@/components/ThemedText";
+import { useAuthStore } from "@domains/auth/hooks/useAuth";
+import { useMessagesStore } from "@domains/messages/hooks/useMessages";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
@@ -10,6 +12,7 @@ import {
   ActivityIndicator,
   FlatList,
   Pressable,
+  RefreshControl,
   StyleSheet,
   TextInput,
   useColorScheme,
