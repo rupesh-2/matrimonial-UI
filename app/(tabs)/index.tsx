@@ -33,11 +33,14 @@ export default function HomeScreen() {
 
   // Load recommendations on component mount
   useEffect(() => {
-    getRecommendations(10, 1).catch(() => {
-      // If API fails, we'll show empty state or fallback data
-      console.log("API not available, showing empty state");
+    getRecommendations(10, 1).catch((error) => {
+      // If API fails, we'll show empty state
+      console.log("API not available, showing empty state:", error);
     });
   }, []);
+
+  // Use actual recommendations from API
+  const displayRecommendations = recommendations || [];
 
   // Handle like/unlike actions
   const handleLike = async (userId: number) => {
@@ -126,7 +129,7 @@ export default function HomeScreen() {
         )}
 
         {/* Loading State */}
-        {isLoading && recommendations.length === 0 && (
+        {isLoading && (!recommendations || recommendations.length === 0) && (
           <View style={styles.loadingContainer}>
             <ThemedText style={styles.loadingText}>
               Loading recommendations...
@@ -135,16 +138,21 @@ export default function HomeScreen() {
         )}
 
         {/* Empty State */}
-        {!isLoading && recommendations.length === 0 && !error && (
-          <View style={styles.emptyContainer}>
-            <ThemedText style={styles.emptyText}>
-              No recommendations available
-            </ThemedText>
-            <ThemedText style={styles.emptySubtext}>
-              Check back later for new matches
-            </ThemedText>
-          </View>
-        )}
+        {!isLoading &&
+          (!recommendations || recommendations.length === 0) &&
+          !error && (
+            <View style={styles.emptyContainer}>
+              <ThemedText style={styles.emptyText}>
+                No recommendations available
+              </ThemedText>
+              <ThemedText style={styles.emptySubtext}>
+                Make sure your Laravel API is running on http://127.0.0.1:8000
+              </ThemedText>
+              <ThemedText style={styles.emptySubtext}>
+                Check the console for API connection details
+              </ThemedText>
+            </View>
+          )}
         {/* Daily Matches Card */}
         <View style={styles.dailyMatchesCard}>
           <LinearGradient
@@ -167,15 +175,28 @@ export default function HomeScreen() {
                   color={isDark ? "#fff" : "#FF6B8B"}
                 />
               </Pressable>
+              <Pressable
+                style={[styles.refreshButton, { marginLeft: 8 }]}
+                onPress={() => {
+                  console.log("Testing API connection...");
+                  getRecommendations(10, 1);
+                }}
+              >
+                <Ionicons
+                  name="bug"
+                  size={16}
+                  color={isDark ? "#fff" : "#FF6B8B"}
+                />
+              </Pressable>
             </View>
 
             <View style={styles.matchCarousel}>
-              {recommendations.slice(0, 3).map((recommendation) => (
+              {displayRecommendations.slice(0, 3).map((recommendation) => (
                 <Pressable key={recommendation.id} style={styles.carouselItem}>
                   <Image
                     source={{
                       uri:
-                        recommendation.photos[0] ||
+                        (recommendation.photos && recommendation.photos[0]) ||
                         `https://randomuser.me/api/portraits/${
                           recommendation.gender === "female" ? "women" : "men"
                         }/${recommendation.id}.jpg`,
@@ -189,10 +210,12 @@ export default function HomeScreen() {
                     tint={isDark ? "dark" : "light"}
                   >
                     <ThemedText style={styles.carouselName}>
-                      {recommendation.name}, {recommendation.age}
+                      {recommendation.name || "Unknown"},{" "}
+                      {recommendation.age || 0}
                     </ThemedText>
                     <ThemedText style={styles.carouselLocation}>
-                      {recommendation.location}, {recommendation.distance} mi
+                      {recommendation.location || "Unknown"},{" "}
+                      {recommendation.distance || 0} mi
                     </ThemedText>
                   </BlurView>
                   <View style={styles.matchActions}>
@@ -259,12 +282,12 @@ export default function HomeScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.discoverScroll}
         >
-          {recommendations.slice(3, 8).map((recommendation) => (
+          {displayRecommendations.slice(3, 8).map((recommendation) => (
             <Pressable key={recommendation.id} style={styles.discoverCard}>
               <Image
                 source={{
                   uri:
-                    recommendation.photos[0] ||
+                    (recommendation.photos && recommendation.photos[0]) ||
                     `https://randomuser.me/api/portraits/${
                       recommendation.gender === "female" ? "women" : "men"
                     }/${recommendation.id}.jpg`,
@@ -278,13 +301,14 @@ export default function HomeScreen() {
               >
                 <View style={styles.discoverInfo}>
                   <ThemedText style={styles.discoverName}>
-                    {recommendation.name}, {recommendation.age}
+                    {recommendation.name || "Unknown"},{" "}
+                    {recommendation.age || 0}
                   </ThemedText>
                   <View style={styles.discoverDetails}>
                     <View style={styles.discoverDetail}>
                       <Ionicons name="location" size={12} color="#fff" />
                       <ThemedText style={styles.discoverDetailText}>
-                        {recommendation.location}
+                        {recommendation.location || "Unknown"}
                       </ThemedText>
                     </View>
                     <View style={styles.discoverDetail}>

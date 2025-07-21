@@ -49,6 +49,9 @@ export default function AuthScreen() {
 
   const { login, register, isLoading, error, clearError } = useAuthStore();
 
+  // Development mode for testing
+  const [devMode, setDevMode] = useState(false);
+
   const slideAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(1)).current;
 
@@ -125,6 +128,21 @@ export default function AuthScreen() {
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
+    // Development mode - bypass API for testing
+    if (devMode) {
+      Alert.alert(
+        "Development Mode",
+        "Login successful! (Development mode - no API call)",
+        [
+          {
+            text: "Continue",
+            onPress: () => router.replace("/(tabs)/"),
+          },
+        ]
+      );
+      return;
+    }
+
     try {
       if (isLogin) {
         await login({
@@ -151,6 +169,23 @@ export default function AuthScreen() {
           "Unable to connect to the server. Please check your internet connection and make sure the backend server is running.",
           [{ text: "OK", onPress: () => clearError() }]
         );
+      } else if (error.response?.status === 422) {
+        // Validation error - show specific validation messages
+        const validationErrors = error.response?.data?.errors;
+        if (validationErrors) {
+          const errorMessages = Object.values(validationErrors)
+            .flat()
+            .join("\n");
+          Alert.alert("Validation Error", errorMessages, [
+            { text: "OK", onPress: () => clearError() },
+          ]);
+        } else {
+          Alert.alert(
+            "Validation Error",
+            "Please check your input and try again.",
+            [{ text: "OK", onPress: () => clearError() }]
+          );
+        }
       } else {
         // Error is handled by the auth store
         console.error("Auth error:", error);
@@ -495,6 +530,16 @@ export default function AuthScreen() {
               </View>
             )}
 
+            {/* Development Mode Toggle */}
+            <TouchableOpacity
+              style={[styles.devModeButton, devMode && styles.devModeActive]}
+              onPress={() => setDevMode(!devMode)}
+            >
+              <Text style={styles.devModeText}>
+                {devMode ? "🟢 Dev Mode ON" : "🔴 Dev Mode OFF"}
+              </Text>
+            </TouchableOpacity>
+
             <TouchableOpacity
               style={[
                 styles.submitButton,
@@ -734,6 +779,24 @@ const styles = StyleSheet.create({
     color: "#C62828",
     fontSize: 14,
     textAlign: "center",
+  },
+  devModeButton: {
+    backgroundColor: "#f0f0f0",
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 16,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#ddd",
+  },
+  devModeActive: {
+    backgroundColor: "#e8f5e8",
+    borderColor: "#4caf50",
+  },
+  devModeText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#666",
   },
 
   submitButton: {

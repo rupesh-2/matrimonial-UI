@@ -21,7 +21,7 @@ export const useMatchmakingStore = create<MatchmakingState>((set, get) => ({
     try {
       const response = await MatchmakingService.getRecommendations(limit, page);
       set({
-        recommendations: response.data,
+        recommendations: response.recommendations,
         isLoading: false,
         error: null,
       });

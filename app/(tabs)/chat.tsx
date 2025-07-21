@@ -77,12 +77,12 @@ export default function ChatList() {
 
   // Filter chats based on search query
   const filteredChats = searchQuery
-    ? conversations.filter((conversation) =>
-        conversation.other_user.name
+    ? (conversations || []).filter((conversation) =>
+        (conversation.other_user?.name || "")
           .toLowerCase()
           .includes(searchQuery.toLowerCase())
       )
-    : conversations;
+    : conversations || [];
 
   // Format timestamp
   const formatTime = (timestamp) => {

@@ -7,10 +7,20 @@ export class MatchmakingService {
     limit: number = 10,
     page: number = 1
   ): Promise<RecommendationsResponse> {
-    const response = await apiClient.get<RecommendationsResponse>(
-      `${API_ENDPOINTS.MATCHMAKING.RECOMMENDATIONS}?limit=${limit}&page=${page}`
-    );
-    return response.data;
+    try {
+      console.log(
+        "Fetching recommendations from:",
+        `${API_ENDPOINTS.MATCHMAKING.RECOMMENDATIONS}?limit=${limit}&page=${page}`
+      );
+      const response = await apiClient.get<RecommendationsResponse>(
+        `${API_ENDPOINTS.MATCHMAKING.RECOMMENDATIONS}?limit=${limit}&page=${page}`
+      );
+      console.log("Recommendations response:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching recommendations:", error);
+      throw error;
+    }
   }
 
   static async getRecommendationsByFilters(filters: {
