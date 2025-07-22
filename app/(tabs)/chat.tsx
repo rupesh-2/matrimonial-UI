@@ -1,8 +1,6 @@
 "use client";
 
 import { ThemedText } from "@/components/ThemedText";
-import { useAuthStore } from "@domains/auth/hooks/useAuth";
-import { useMessagesStore } from "@domains/messages/hooks/useMessages";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
@@ -18,6 +16,8 @@ import {
   useColorScheme,
   View,
 } from "react-native";
+import { useAuthStore } from "../../modules/auth/hooks/useAuth";
+import { useMessagesStore } from "../../modules/messages/hooks/useMessages";
 
 // Message templates to generate random conversations
 const messageTemplates = [

@@ -1,6 +1,5 @@
 "use client";
 
-import { useAuthStore } from "@domains/auth/hooks/useAuth";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
@@ -20,6 +19,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useAuthStore } from "../../modules/auth/hooks/useAuth";
 
 const { width, height } = Dimensions.get("window");
 

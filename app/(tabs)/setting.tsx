@@ -1,10 +1,10 @@
 import { ThemedText } from "@/components/ThemedText";
-import { useAuthStore } from "@domains/auth/hooks/useAuth";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { useAuthStore } from "../../modules/auth/hooks/useAuth";
 
 export default function SettingScreen() {
   const { logout } = useAuthStore();

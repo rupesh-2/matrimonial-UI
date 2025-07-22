@@ -1,7 +1,4 @@
 import { ThemedText } from "@/components/ThemedText";
-import { useAuthStore } from "@domains/auth/hooks/useAuth";
-import { useLikesStore } from "@domains/likes/hooks/useLikes";
-import { useMatchmakingStore } from "@domains/matchmaking/hooks/useMatchmaking";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
@@ -18,6 +15,9 @@ import {
   useColorScheme,
   View,
 } from "react-native";
+import { useAuthStore } from "../../modules/auth/hooks/useAuth";
+import { useLikesStore } from "../../modules/likes/hooks/useLikes";
+import { useMatchmakingStore } from "../../modules/matchmaking/hooks/useMatchmaking";
 
 const { width } = Dimensions.get("window");
 
