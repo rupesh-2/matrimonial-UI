@@ -4,7 +4,7 @@ import {
   ConversationsResponse,
   MessagesResponse,
   SendMessageData,
-} from "@types/messages";
+} from "../../../types/messages";
 
 export class MessagesService {
   static async getConversations(

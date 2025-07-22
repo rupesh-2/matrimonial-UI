@@ -1,10 +1,10 @@
+import { create } from "zustand";
 import {
   Profile,
   ProfilePreferences,
   UpdatePreferencesData,
   UpdateProfileData,
-} from "@types/profile";
-import { create } from "zustand";
+} from "../../../types/profile";
 import ProfileService from "../services/profileService";
 
 interface ProfileState {

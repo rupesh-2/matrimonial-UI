@@ -1,6 +1,6 @@
 import { useAuthStore } from "@domains/auth/hooks/useAuth";
-import { User } from "@types/auth";
 import React, { createContext, ReactNode, useContext, useEffect } from "react";
+import { User } from "../types/auth";
 
 interface AuthContextType {
   user: User | null;

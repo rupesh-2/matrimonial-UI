@@ -1,10 +1,10 @@
+import { create } from "zustand";
 import {
   AuthState,
   LoginCredentials,
   RegisterCredentials,
   User,
-} from "@types/auth";
-import { create } from "zustand";
+} from "../../../types/auth";
 import AuthService from "../services/authService";
 
 interface AuthStore extends AuthState {

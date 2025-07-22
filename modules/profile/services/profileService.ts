@@ -5,7 +5,7 @@ import {
   ProfilePreferences,
   UpdatePreferencesData,
   UpdateProfileData,
-} from "@types/profile";
+} from "../../../types/profile";
 
 export class ProfileService {
   static async getProfile(): Promise<Profile> {

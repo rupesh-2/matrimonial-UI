@@ -1,5 +1,5 @@
-import { Match } from "@types/matches";
 import { create } from "zustand";
+import { Match } from "../../../types/matches";
 import MatchesService from "../services/matchesService";
 
 interface MatchesState {

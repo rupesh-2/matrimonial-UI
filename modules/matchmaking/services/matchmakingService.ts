@@ -1,18 +1,18 @@
 import { API_ENDPOINTS } from "@constants/api";
 import apiClient from "@lib/axios";
-import { RecommendationsResponse } from "@types/matches";
+import { RecommendationResponse } from "../../../types/matchmaking";
 
 export class MatchmakingService {
   static async getRecommendations(
     limit: number = 10,
     page: number = 1
-  ): Promise<RecommendationsResponse> {
+  ): Promise<RecommendationResponse> {
     try {
       console.log(
         "Fetching recommendations from:",
         `${API_ENDPOINTS.MATCHMAKING.RECOMMENDATIONS}?limit=${limit}&page=${page}`
       );
-      const response = await apiClient.get<RecommendationsResponse>(
+      const response = await apiClient.get<RecommendationResponse>(
         `${API_ENDPOINTS.MATCHMAKING.RECOMMENDATIONS}?limit=${limit}&page=${page}`
       );
       console.log("Recommendations response:", response.data);
@@ -29,7 +29,7 @@ export class MatchmakingService {
     gender?: "male" | "female" | "both";
     maxDistance?: number;
     interests?: string[];
-  }): Promise<RecommendationsResponse> {
+  }): Promise<RecommendationResponse> {
     const params = new URLSearchParams();
 
     if (filters.minAge) params.append("min_age", filters.minAge.toString());
@@ -43,7 +43,7 @@ export class MatchmakingService {
       );
     }
 
-    const response = await apiClient.get<RecommendationsResponse>(
+    const response = await apiClient.get<RecommendationResponse>(
       `${API_ENDPOINTS.MATCHMAKING.RECOMMENDATIONS}?${params.toString()}`
     );
     return response.data;

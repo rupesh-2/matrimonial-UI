@@ -1,6 +1,6 @@
 import { API_ENDPOINTS } from "@constants/api";
 import apiClient from "@lib/axios";
-import { MatchResponse } from "@types/matches";
+import { MatchResponse } from "../../../types/matches";
 
 export class MatchesService {
   static async getMatches(page: number = 1): Promise<MatchResponse> {

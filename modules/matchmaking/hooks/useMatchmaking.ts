@@ -1,5 +1,5 @@
-import { Recommendation } from "@types/matchmaking";
 import { create } from "zustand";
+import { Recommendation } from "../../../types/matchmaking";
 import MatchmakingService from "../services/matchmakingService";
 
 interface MatchmakingState {
@@ -21,7 +21,7 @@ export const useMatchmakingStore = create<MatchmakingState>((set, get) => ({
     try {
       const response = await MatchmakingService.getRecommendations(limit, page);
       set({
-        recommendations: response.recommendations,
+        recommendations: response.data,
         isLoading: false,
         error: null,
       });

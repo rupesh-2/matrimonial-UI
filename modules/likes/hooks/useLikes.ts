@@ -1,5 +1,5 @@
-import { Like, LikeResponse } from "@types/likes";
 import { create } from "zustand";
+import { Like, LikeResponse } from "../../../types/likes";
 import LikesService from "../services/likesService";
 
 interface LikesState {

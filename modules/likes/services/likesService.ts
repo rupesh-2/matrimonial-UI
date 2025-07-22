@@ -1,6 +1,6 @@
 import { API_ENDPOINTS } from "@constants/api";
 import apiClient from "@lib/axios";
-import { LikeActionResponse, LikeResponse } from "@types/likes";
+import { LikeActionResponse, LikeResponse } from "../../../types/likes";
 
 export class LikesService {
   static async getLikes(page: number = 1): Promise<LikeResponse> {

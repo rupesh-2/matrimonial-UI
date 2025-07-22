@@ -1,5 +1,5 @@
-import { Conversation, Message } from "@types/messages";
 import { create } from "zustand";
+import { Conversation, Message } from "../../../types/messages";
 import MessagesService from "../services/messagesService";
 
 interface MessagesState {

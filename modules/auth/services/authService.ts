@@ -5,7 +5,7 @@ import {
   LoginCredentials,
   RegisterCredentials,
   User,
-} from "@types/auth";
+} from "../../../types/auth";
 
 export class AuthService {
   static async register(
