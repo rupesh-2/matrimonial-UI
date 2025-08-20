@@ -63,12 +63,16 @@ export default function SignUpScreen() {
   };
 
   const validateForm = () => {
+    console.log("Validating form data:", formData);
+
     if (!formData.email || !validateEmail(formData.email)) {
+      console.log("Email validation failed");
       Alert.alert("Invalid Email", "Please enter a valid email address");
       return false;
     }
 
     if (!formData.password || formData.password.length < 6) {
+      console.log("Password validation failed");
       Alert.alert(
         "Invalid Password",
         "Password must be at least 6 characters long"
@@ -77,30 +81,38 @@ export default function SignUpScreen() {
     }
 
     if (formData.password !== formData.confirmPassword) {
+      console.log("Password confirmation validation failed");
       Alert.alert("Password Mismatch", "Passwords do not match");
       return false;
     }
 
     if (!formData.fullName.trim()) {
+      console.log("Full name validation failed");
       Alert.alert("Missing Information", "Please enter your full name");
       return false;
     }
 
     if (!formData.phoneNumber.trim()) {
+      console.log("Phone number validation failed");
       Alert.alert("Missing Information", "Please enter your phone number");
       return false;
     }
 
     if (!formData.gender) {
+      console.log("Gender validation failed");
       Alert.alert("Missing Information", "Please select your gender");
       return false;
     }
 
+    console.log("Form validation passed");
     return true;
   };
 
   const handleSubmit = async () => {
     if (!validateForm()) return;
+
+    console.log("Sign-up form data:", formData);
+    console.log("Attempting to register user...");
 
     // Development mode - bypass API for testing
     if (devMode) {
@@ -110,7 +122,7 @@ export default function SignUpScreen() {
         [
           {
             text: "Continue",
-            onPress: () => router.replace("/(tabs)/"),
+            onPress: () => router.replace("/(tabs)"),
           },
         ]
       );
@@ -118,14 +130,23 @@ export default function SignUpScreen() {
     }
 
     try {
+      console.log("Calling register function with:", {
+        name: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        password_confirmation: formData.confirmPassword,
+      });
+
       await register({
         name: formData.fullName,
         email: formData.email,
         password: formData.password,
         password_confirmation: formData.confirmPassword,
       });
+
+      console.log("Registration successful, navigating to tabs");
       // Navigate to main app after successful registration
-      router.replace("/(tabs)/");
+      router.replace("/(tabs)");
     } catch (error: any) {
       // Show specific error message for network issues
       if (error.message === "Network Error") {
@@ -400,7 +421,10 @@ export default function SignUpScreen() {
             {/* Development Mode Toggle */}
             <TouchableOpacity
               style={[styles.devModeButton, devMode && styles.devModeActive]}
-              onPress={() => setDevMode(!devMode)}
+              onPress={() => {
+                console.log("Dev mode toggled from", devMode, "to", !devMode);
+                setDevMode(!devMode);
+              }}
             >
               <Text style={styles.devModeText}>
                 {devMode ? "🟢 Dev Mode ON" : "🔴 Dev Mode OFF"}
@@ -412,7 +436,10 @@ export default function SignUpScreen() {
                 styles.submitButton,
                 isLoading && styles.submitButtonDisabled,
               ]}
-              onPress={handleSubmit}
+              onPress={() => {
+                console.log("Submit button pressed");
+                handleSubmit();
+              }}
               disabled={isLoading}
             >
               <LinearGradient

@@ -2,7 +2,7 @@ import { Redirect, usePathname } from "expo-router";
 import React from "react";
 import { useAuthStore } from "../modules/auth/hooks/useAuth";
 
-const PUBLIC_ROUTES = ["/auth/login", "/auth/signup", "/auth/forgot-password"];
+const PUBLIC_ROUTES = ["/(auth)/login-screen", "/(auth)/sign-up", "/(auth)/forgot-password"];
 
 export default function AuthMiddleware({
   children,
@@ -17,7 +17,7 @@ export default function AuthMiddleware({
 
   // If not authenticated and not on a public route, redirect to login
   if (!user && !PUBLIC_ROUTES.includes(pathname)) {
-    return <Redirect href="../auth/login" />;
+    return <Redirect href="/(auth)/login-screen" />;
   }
 
   // If authenticated and on a public route, redirect to home

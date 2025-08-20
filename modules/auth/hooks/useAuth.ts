@@ -44,9 +44,12 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
 
   register: async (credentials: RegisterCredentials) => {
+    console.log("Auth store: Starting registration with credentials:", credentials);
     set({ isLoading: true, error: null });
     try {
+      console.log("Auth store: Calling AuthService.register...");
       const response = await AuthService.register(credentials);
+      console.log("Auth store: Registration successful, response:", response);
       set({
         user: response.user,
         token: response.token,
@@ -55,6 +58,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         error: null,
       });
     } catch (error: any) {
+      console.log("Auth store: Registration failed, error:", error);
       set({
         isLoading: false,
         error: error.response?.data?.message || "Registration failed",

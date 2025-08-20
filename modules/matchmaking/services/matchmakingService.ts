@@ -12,11 +12,21 @@ export class MatchmakingService {
         "Fetching recommendations from:",
         `${API_ENDPOINTS.MATCHMAKING.RECOMMENDATIONS}?limit=${limit}&page=${page}`
       );
-      const response = await apiClient.get<RecommendationResponse>(
+      const response = await apiClient.get<any>(
         `${API_ENDPOINTS.MATCHMAKING.RECOMMENDATIONS}?limit=${limit}&page=${page}`
       );
       console.log("Recommendations response:", response.data);
-      return response.data;
+
+      // Transform the API response to match expected structure
+      const transformedResponse: RecommendationResponse = {
+        data: response.data.recommendations || [],
+        current_page: page,
+        last_page: 1,
+        total: response.data.total || 0,
+        per_page: limit,
+      };
+
+      return transformedResponse;
     } catch (error) {
       console.error("Error fetching recommendations:", error);
       throw error;

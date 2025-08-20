@@ -11,10 +11,18 @@ export class AuthService {
   static async register(
     credentials: RegisterCredentials
   ): Promise<AuthResponse> {
+    console.log(
+      "AuthService: Registering with endpoint:",
+      API_ENDPOINTS.AUTH.REGISTER
+    );
+    console.log("AuthService: Registering with credentials:", credentials);
+
     const response = await apiClient.post<AuthResponse>(
       API_ENDPOINTS.AUTH.REGISTER,
       credentials
     );
+
+    console.log("AuthService: Registration response:", response.data);
 
     if (response.data.token) {
       await apiClient.setAuthToken(response.data.token);

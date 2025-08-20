@@ -56,10 +56,10 @@ export default function HomeScreen() {
   const handleLike = async (userId: number) => {
     try {
       const result = await likeUser(userId);
-      if (result.isMatch) {
+      if (result.is_match) {
         Alert.alert(
           "It's a Match! 🎉",
-          `You and ${result.matchedUser?.name} liked each other!`,
+          `You and ${result.matched_user?.name} liked each other!`,
           [{ text: "Great!", style: "default" }]
         );
       }
@@ -213,19 +213,19 @@ export default function HomeScreen() {
                     .slice(0, 3)
                     .map((recommendation) => (
                       <Pressable
-                        key={recommendation?.id || Math.random()}
+                        key={recommendation?.user?.id || Math.random()}
                         style={styles.carouselItem}
                       >
                         <Image
                           source={{
                             uri:
-                              (recommendation?.photos &&
-                                recommendation.photos[0]) ||
+                              (recommendation?.user?.photos &&
+                                recommendation.user.photos[0]) ||
                               `https://randomuser.me/api/portraits/${
-                                recommendation?.gender === "female"
+                                recommendation?.user?.gender === "female"
                                   ? "women"
                                   : "men"
-                              }/${recommendation?.id || 1}.jpg`,
+                              }/${recommendation?.user?.id || 1}.jpg`,
                           }}
                           style={styles.carouselImage}
                           contentFit="cover"
@@ -236,26 +236,28 @@ export default function HomeScreen() {
                           tint={isDark ? "dark" : "light"}
                         >
                           <ThemedText style={styles.carouselName}>
-                            {recommendation?.name || "Unknown"},{" "}
-                            {recommendation?.age || 0}
+                            {recommendation?.user?.name || "Unknown"},{" "}
+                            {recommendation?.user?.age || 0}
                           </ThemedText>
                           <ThemedText style={styles.carouselLocation}>
-                            {recommendation?.location || "Unknown"},{" "}
-                            {recommendation?.distance || 0} mi
+                            {recommendation?.user?.location || "Unknown"},{" "}
+                            {recommendation?.user?.distance || 0} mi
                           </ThemedText>
                         </BlurView>
                         <View style={styles.matchActions}>
                           <Pressable
                             style={[styles.actionButton, styles.declineButton]}
                             onPress={() =>
-                              handleUnlike(recommendation?.id || 0)
+                              handleUnlike(recommendation?.user?.id || 0)
                             }
                           >
                             <Ionicons name="close" size={22} color="#FF5C5C" />
                           </Pressable>
                           <Pressable
                             style={[styles.actionButton, styles.likeButton]}
-                            onPress={() => handleLike(recommendation?.id || 0)}
+                            onPress={() =>
+                              handleLike(recommendation?.user?.id || 0)
+                            }
                           >
                             <Ionicons name="heart" size={22} color="#FF6B8B" />
                           </Pressable>
@@ -321,19 +323,19 @@ export default function HomeScreen() {
                 .slice(3, 8)
                 .map((recommendation) => (
                   <Pressable
-                    key={recommendation?.id || Math.random()}
+                    key={recommendation?.user?.id || Math.random()}
                     style={styles.discoverCard}
                   >
                     <Image
                       source={{
                         uri:
-                          (recommendation?.photos &&
-                            recommendation.photos[0]) ||
+                          (recommendation?.user?.photos &&
+                            recommendation.user.photos[0]) ||
                           `https://randomuser.me/api/portraits/${
-                            recommendation?.gender === "female"
+                            recommendation?.user?.gender === "female"
                               ? "women"
                               : "men"
-                          }/${recommendation?.id || 1}.jpg`,
+                          }/${recommendation?.user?.id || 1}.jpg`,
                       }}
                       style={styles.discoverImage}
                       contentFit="cover"
@@ -344,20 +346,21 @@ export default function HomeScreen() {
                     >
                       <View style={styles.discoverInfo}>
                         <ThemedText style={styles.discoverName}>
-                          {recommendation?.name || "Unknown"},{" "}
-                          {recommendation?.age || 0}
+                          {recommendation?.user?.name || "Unknown"},{" "}
+                          {recommendation?.user?.age || 0}
                         </ThemedText>
                         <View style={styles.discoverDetails}>
                           <View style={styles.discoverDetail}>
                             <Ionicons name="location" size={12} color="#fff" />
                             <ThemedText style={styles.discoverDetailText}>
-                              {recommendation?.location || "Unknown"}
+                              {recommendation?.user?.location || "Unknown"}
                             </ThemedText>
                           </View>
                           <View style={styles.discoverDetail}>
                             <Ionicons name="briefcase" size={12} color="#fff" />
                             <ThemedText style={styles.discoverDetailText}>
-                              {recommendation?.occupation || "Professional"}
+                              {recommendation?.user?.occupation ||
+                                "Professional"}
                             </ThemedText>
                           </View>
                         </View>
@@ -365,7 +368,8 @@ export default function HomeScreen() {
                     </LinearGradient>
                     <View style={styles.compatibilityBadge}>
                       <ThemedText style={styles.compatibilityText}>
-                        {Math.round(recommendation.compatibility_score)}% Match
+                        {Math.round(recommendation.compatibility_percentage)}%
+                        Match
                       </ThemedText>
                     </View>
                   </Pressable>

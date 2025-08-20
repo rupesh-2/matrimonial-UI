@@ -1,17 +1,20 @@
 export interface Recommendation {
-  id: number;
-  name: string;
-  age: number;
-  gender: "male" | "female";
-  location: string;
-  distance: number;
-  occupation?: string;
-  photos: string[];
-  compatibility_score: number;
-  bio?: string;
-  interests?: string[];
-  created_at: string;
-  updated_at: string;
+  compatibility_percentage: number;
+  score: number;
+  user: {
+    id: number;
+    name: string;
+    age: number;
+    gender: "male" | "female";
+    location: string;
+    distance: number;
+    occupation?: string;
+    photos: string[];
+    bio?: string;
+    interests?: string[];
+    created_at: string;
+    updated_at: string;
+  };
 }
 
 export interface RecommendationResponse {

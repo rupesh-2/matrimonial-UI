@@ -19,7 +19,6 @@ const getBaseUrl = () => {
 export const API_BASE_URL = getBaseUrl();
 
 export const API_ENDPOINTS = {
-  // Authentication
   AUTH: {
     REGISTER: "/api/register",
     LOGIN: "/api/login",
@@ -27,7 +26,6 @@ export const API_ENDPOINTS = {
     USER: "/api/user",
   },
 
-  // User Profile
   PROFILE: {
     GET: "/api/profile",
     UPDATE: "/api/profile",
