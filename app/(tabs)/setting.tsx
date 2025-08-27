@@ -172,12 +172,59 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
+  profileSection: {
+    marginTop: 20,
+    backgroundColor: "white",
+    marginHorizontal: 16,
+    borderRadius: 12,
+    overflow: "hidden",
+    padding: 20,
+  },
+  profileSectionDark: {
+    backgroundColor: "#1e1e1e",
+  },
+  profileHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  profileImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginRight: 16,
+  },
+  profileInfo: {
+    flex: 1,
+  },
+  profileName: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 4,
+  },
+  profileEmail: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 2,
+  },
+  profileLocation: {
+    fontSize: 14,
+    color: "#999",
+  },
+  editButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: "rgba(255, 107, 139, 0.1)",
+  },
   section: {
     marginTop: 20,
     backgroundColor: "white",
     marginHorizontal: 16,
     borderRadius: 12,
     overflow: "hidden",
+  },
+  sectionDark: {
+    backgroundColor: "#1e1e1e",
   },
   sectionTitle: {
     fontSize: 16,
@@ -186,6 +233,9 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingBottom: 8,
   },
+  sectionTitleDark: {
+    color: "#fff",
+  },
   settingItem: {
     flexDirection: "row",
     alignItems: "center",
@@ -193,11 +243,17 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#f0f0f0",
   },
+  settingItemDark: {
+    borderBottomColor: "#333",
+  },
   settingText: {
     flex: 1,
     fontSize: 16,
     color: "#333",
     marginLeft: 12,
+  },
+  settingTextDark: {
+    color: "#fff",
   },
   logoutItem: {
     borderBottomWidth: 0,
