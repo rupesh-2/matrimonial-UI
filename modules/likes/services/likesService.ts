@@ -11,9 +11,12 @@ export class LikesService {
   }
 
   static async likeUser(userId: number): Promise<LikeActionResponse> {
-    const response = await apiClient.post<LikeActionResponse>(
-      API_ENDPOINTS.LIKES.LIKE(userId.toString())
-    );
+    const url = API_ENDPOINTS.LIKES.LIKE(userId.toString());
+    console.log("Like user URL:", url);
+    console.log("Like user request payload:", { userId });
+    
+    const response = await apiClient.post<LikeActionResponse>(url);
+    console.log("Like user response:", response.data);
     return response.data;
   }
 

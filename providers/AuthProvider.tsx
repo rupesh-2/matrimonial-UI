@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, ReactNode, useContext, useEffect } from "react";
 import { useAuthStore } from "../modules/auth/hooks/useAuth";
 import { User } from "../types/auth";
@@ -61,9 +62,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     // Check if user is authenticated on app start
-    if (!isAuthenticated && !isLoading) {
-      getCurrentUser();
-    }
+    // Only try to get current user if we have a stored token
+    const checkAuthStatus = async () => {
+      try {
+        // Check if there's a stored token first
+        const token = await AsyncStorage.getItem("auth_token");
+        if (token && !isAuthenticated && !isLoading) {
+          console.log(
+            "[AuthProvider] Found stored token, attempting to get current user"
+          );
+          await getCurrentUser();
+        } else {
+          console.log(
+            "[AuthProvider] No stored token found, user needs to login"
+          );
+        }
+      } catch (error) {
+        console.log("[AuthProvider] Error checking auth status:", error);
+      }
+    };
+
+    checkAuthStatus();
   }, []);
 
   const value: AuthContextType = {

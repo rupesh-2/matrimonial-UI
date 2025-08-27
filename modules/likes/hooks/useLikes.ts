@@ -42,7 +42,16 @@ export const useLikesStore = create<LikesState>((set, get) => ({
   likeUser: async (userId: number) => {
     set({ isLoading: true, error: null });
     try {
+      console.log("Liking user with ID:", userId);
+      console.log("Current user state:", get());
+
+      // Validate userId
+      if (!userId || userId <= 0) {
+        throw new Error("Invalid user ID provided");
+      }
+
       const response = await LikesService.likeUser(userId);
+      console.log("Like response:", response);
       set({
         likedUserIds: [...get().likedUserIds, userId],
         isLoading: false,
@@ -50,6 +59,27 @@ export const useLikesStore = create<LikesState>((set, get) => ({
       });
       return response;
     } catch (error: any) {
+      console.error("Error liking user:", error);
+      console.error("Error response data:", error.response?.data);
+      console.error("Error response status:", error.response?.status);
+      console.error("Error response headers:", error.response?.headers);
+
+      // Don't treat "already liked" as an error state
+      if (
+        error.response?.data?.message === "Already liked this user" ||
+        error.response?.data?.message === "Already liked this profile"
+      ) {
+        set({
+          isLoading: false,
+          error: null,
+        });
+        // Return a mock response for already liked case
+        return {
+          is_match: false,
+          message: error.response?.data?.message || "Already liked this user",
+        };
+      }
+
       set({
         isLoading: false,
         error: error.response?.data?.message || "Failed to like user",
@@ -61,13 +91,16 @@ export const useLikesStore = create<LikesState>((set, get) => ({
   unlikeUser: async (userId: number) => {
     set({ isLoading: true, error: null });
     try {
+      console.log("Unliking user with ID:", userId);
       await LikesService.unlikeUser(userId);
+      console.log("User unliked successfully");
       set({
         likedUserIds: get().likedUserIds.filter((id) => id !== userId),
         isLoading: false,
         error: null,
       });
     } catch (error: any) {
+      console.error("Error unliking user:", error);
       set({
         isLoading: false,
         error: error.response?.data?.message || "Failed to unlike user",

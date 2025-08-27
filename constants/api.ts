@@ -5,10 +5,14 @@ const isDevelopment = __DEV__;
 const isAndroid = Platform.OS === "android";
 
 // For Android emulator, use 10.0.2.2 instead of 127.0.0.1
+// For physical Android device, use your computer's IP address
 const getBaseUrl = () => {
   if (isDevelopment) {
     if (isAndroid) {
-      return "http://10.0.2.2:8000"; // Android emulator
+      // Check if running on physical device or emulator
+      // For physical device, use your computer's IP address
+      // For emulator, use 10.0.2.2
+      return "http://192.168.1.69:8000"; // Physical Android device (Expo Go)
     } else {
       return "http://127.0.0.1:8000"; // iOS simulator or web
     }
@@ -47,8 +51,8 @@ export const API_ENDPOINTS = {
   // Likes
   LIKES: {
     LIST: "/api/likes",
-    LIKE: (userId: string) => `/api/likes/${userId}`,
-    UNLIKE: (userId: string) => `/api/likes/${userId}`,
+    LIKE: (userId: string) => `/api/discover/like/${userId}`,
+    UNLIKE: (userId: string) => `/api/discover/unlike/${userId}`,
   },
 
   // Messages

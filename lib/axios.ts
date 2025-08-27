@@ -24,12 +24,21 @@ class ApiClient {
     this.instance.interceptors.request.use(
       async (config) => {
         const token = await this.getToken();
+        // Only log token status for debugging when needed
+        if (process.env.NODE_ENV === "development") {
+          console.log(
+            `[API] ${config.method?.toUpperCase()} ${config.url} - Token: ${
+              token ? "Present" : "Missing"
+            }`
+          );
+        }
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
         return config;
       },
       (error) => {
+        console.error("[API] Request interceptor error:", error);
         return Promise.reject(error);
       }
     );
@@ -40,10 +49,32 @@ class ApiClient {
         return response;
       },
       async (error) => {
+        console.error("[API] Response error:", {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          url: error.config?.url,
+          method: error.config?.method,
+          message: error.message,
+          code: error.code,
+        });
+
+        if (
+          error.code === "ECONNREFUSED" ||
+          error.message === "Network Error"
+        ) {
+          console.error(
+            "[API] Server connection failed. Make sure your Laravel backend is running on:",
+            API_BASE_URL
+          );
+        }
+
         if (error.response?.status === 401) {
           // Token expired or invalid, clear storage and redirect to login
           await this.clearToken();
-          // You can emit an event here to notify the app about auth failure
+          // Only log if it's not a missing token (which is expected for unauthenticated users)
+          if (error.config?.url !== "/api/user") {
+            console.log("[API] Authentication failed, token cleared");
+          }
         }
         return Promise.reject(error);
       }

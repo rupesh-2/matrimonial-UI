@@ -204,6 +204,30 @@ export default function AuthScreen() {
     );
   };
 
+  const checkServerStatus = async () => {
+    try {
+      const status = await ServerStatusChecker.checkServerStatus();
+      const info = ServerStatusChecker.getServerInfo();
+
+      if (status.isOnline) {
+        Alert.alert(
+          "Server Status",
+          `✅ Server is online!\nURL: ${status.url}\nResponse time: ${status.responseTime}ms`,
+          [{ text: "OK" }]
+        );
+      } else {
+        Alert.alert(
+          "Server Status",
+          `❌ Server is offline\nURL: ${status.url}\nError: ${status.error}\n\nTroubleshooting:\n• ${info.troubleshooting.laravelServer}\n• ${info.troubleshooting.androidEmulator}\n• ${info.troubleshooting.iosSimulator}`,
+          [{ text: "OK" }]
+        );
+      }
+    } catch (error) {
+      console.error("Server status check failed:", error);
+      Alert.alert("Error", "Failed to check server status");
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#E91E63" />
@@ -219,6 +243,15 @@ export default function AuthScreen() {
           </View>
           <Text style={styles.appName}>Perfect Match</Text>
           <Text style={styles.tagline}>Find Your Life Partner</Text>
+
+          {/* Server Status Check Button */}
+          <TouchableOpacity
+            style={styles.serverStatusButton}
+            onPress={checkServerStatus}
+          >
+            <Ionicons name="server-outline" size={16} color="white" />
+            <Text style={styles.serverStatusText}>Check Server</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Auth Toggle */}
@@ -642,6 +675,21 @@ const styles = StyleSheet.create({
   tagline: {
     fontSize: 16,
     color: "rgba(255, 255, 255, 0.8)",
+  },
+  serverStatusButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+    marginTop: 10,
+  },
+  serverStatusText: {
+    fontSize: 12,
+    color: "white",
+    marginLeft: 4,
+    fontWeight: "500",
   },
   authToggle: {
     flexDirection: "row",

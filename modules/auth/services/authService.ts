@@ -32,16 +32,39 @@ export class AuthService {
   }
 
   static async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>(
-      API_ENDPOINTS.AUTH.LOGIN,
-      credentials
+    console.log(
+      "[AuthService] Attempting login to:",
+      `${API_ENDPOINTS.AUTH.LOGIN}`
     );
+    console.log("[AuthService] Login credentials:", {
+      email: credentials.email,
+      password: "***",
+    });
 
-    if (response.data.token) {
-      await apiClient.setAuthToken(response.data.token);
+    try {
+      const response = await apiClient.post<AuthResponse>(
+        API_ENDPOINTS.AUTH.LOGIN,
+        credentials
+      );
+
+      console.log("[AuthService] Login successful");
+
+      if (response.data.token) {
+        await apiClient.setAuthToken(response.data.token);
+      }
+
+      return response.data;
+    } catch (error: any) {
+      console.error("[AuthService] Login failed:", {
+        message: error.message,
+        code: error.code,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        url: error.config?.url,
+        method: error.config?.method,
+      });
+      throw error;
     }
-
-    return response.data;
   }
 
   static async logout(): Promise<void> {
