@@ -67,7 +67,7 @@ export default function TabLayout() {
             <Ionicons
               size={28}
               name={focused ? "home" : "home-outline"}
-              color={color}
+              color={focused ? "#FF6B8B" : color}
             />
           ),
         }}
@@ -80,7 +80,7 @@ export default function TabLayout() {
             <Ionicons
               size={28}
               name={focused ? "chatbubbles" : "chatbubbles-outline"}
-              color={color}
+              color={focused ? "#FF6B8B" : color}
             />
           ),
         }}
@@ -93,7 +93,7 @@ export default function TabLayout() {
             <Ionicons
               size={28}
               name={focused ? "notifications" : "notifications-outline"}
-              color={color}
+              color={focused ? "#FF6B8B" : color}
             />
           ),
         }}
@@ -106,7 +106,7 @@ export default function TabLayout() {
             <Ionicons
               size={28}
               name={focused ? "settings" : "settings-outline"}
-              color={color}
+              color={focused ? "#FF6B8B" : color}
             />
           ),
         }}
