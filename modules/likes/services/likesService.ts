@@ -14,17 +14,44 @@ export class LikesService {
     const url = API_ENDPOINTS.LIKES.LIKE(userId.toString());
     console.log("Like user URL:", url);
     console.log("Like user request payload:", { userId });
-    
-    const response = await apiClient.post<LikeActionResponse>(url);
-    console.log("Like user response:", response.data);
-    return response.data;
+
+    try {
+      const response = await apiClient.post<LikeActionResponse>(url);
+      console.log("Like user response:", response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error("LikesService likeUser error:", {
+        url,
+        userId,
+        error: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+        headers: error.response?.headers,
+      });
+      throw error;
+    }
   }
 
   static async unlikeUser(userId: number): Promise<LikeActionResponse> {
-    const response = await apiClient.delete<LikeActionResponse>(
-      API_ENDPOINTS.LIKES.UNLIKE(userId.toString())
-    );
-    return response.data;
+    const url = API_ENDPOINTS.LIKES.UNLIKE(userId.toString());
+    console.log("Unlike user URL:", url);
+    console.log("Unlike user request payload:", { userId });
+
+    try {
+      const response = await apiClient.delete<LikeActionResponse>(url);
+      console.log("Unlike user response:", response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error("LikesService unlikeUser error:", {
+        url,
+        userId,
+        error: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+        headers: error.response?.headers,
+      });
+      throw error;
+    }
   }
 
   static async checkIfLiked(userId: number): Promise<{ is_liked: boolean }> {

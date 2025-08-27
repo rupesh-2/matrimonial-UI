@@ -56,6 +56,8 @@ class ApiClient {
           method: error.config?.method,
           message: error.message,
           code: error.code,
+          data: error.response?.data,
+          headers: error.response?.headers,
         });
 
         if (

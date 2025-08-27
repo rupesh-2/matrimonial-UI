@@ -5,7 +5,7 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Alert,
   Dimensions,
@@ -33,6 +33,9 @@ export default function HomeScreen() {
   const { likeUser, unlikeUser, likedUserIds } = useLikesStore();
   const { user } = useAuthStore();
 
+  // State for tracking removed users
+  const [removedUserIds, setRemovedUserIds] = useState<number[]>([]);
+
   // Load recommendations on component mount
   useEffect(() => {
     // Only load recommendations if user is authenticated
@@ -47,9 +50,13 @@ export default function HomeScreen() {
     }
   }, [user?.id]);
 
-  // Use actual recommendations from API with safety checks
+  // Use actual recommendations from API with safety checks, filtered to remove deleted users
   const displayRecommendations = Array.isArray(recommendations)
-    ? recommendations
+    ? recommendations.filter(
+        (recommendation) =>
+          recommendation?.user?.id &&
+          !removedUserIds.includes(recommendation.user.id)
+      )
     : [];
 
   // Debug logging
@@ -138,8 +145,11 @@ export default function HomeScreen() {
           text: "Remove",
           style: "destructive",
           onPress: () => {
-            // This would typically call an API to hide this user from recommendations
             console.log("Removing user from matches:", userId);
+
+            // Add user ID to removed list
+            setRemovedUserIds((prev) => [...prev, userId]);
+
             Alert.alert("Success", "User removed from today's matches!", [
               { text: "OK", style: "default" },
             ]);
@@ -151,6 +161,8 @@ export default function HomeScreen() {
 
   const handleRefresh = () => {
     if (user?.id) {
+      // Clear removed users list when refreshing
+      setRemovedUserIds([]);
       refresh();
     }
   };
@@ -300,107 +312,74 @@ export default function HomeScreen() {
               </View>
             </View>
 
-            <View style={styles.matchCarousel}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.matchCarousel}
+              style={{ flexGrow: 0 }}
+            >
               {(() => {
                 try {
-                  return displayRecommendations
-                    .slice(0, 3)
-                    .map((recommendation) => (
-                      <Pressable
-                        key={recommendation?.user?.id || Math.random()}
-                        style={styles.carouselItem}
+                  return displayRecommendations.map((recommendation) => (
+                    <Pressable
+                      key={recommendation?.user?.id || Math.random()}
+                      style={styles.carouselItem}
+                    >
+                      <Image
+                        source={{
+                          uri:
+                            (recommendation?.user?.photos &&
+                              recommendation.user.photos[0]) ||
+                            `https://randomuser.me/api/portraits/${
+                              recommendation?.user?.gender === "female"
+                                ? "women"
+                                : "men"
+                            }/${recommendation?.user?.id || 1}.jpg`,
+                        }}
+                        style={styles.carouselImage}
+                        contentFit="cover"
+                      />
+                      <BlurView
+                        intensity={90}
+                        style={styles.carouselInfo}
+                        tint={isDark ? "dark" : "light"}
                       >
-                        <Image
-                          source={{
-                            uri:
-                              (recommendation?.user?.photos &&
-                                recommendation.user.photos[0]) ||
-                              `https://randomuser.me/api/portraits/${
-                                recommendation?.user?.gender === "female"
-                                  ? "women"
-                                  : "men"
-                              }/${recommendation?.user?.id || 1}.jpg`,
-                          }}
-                          style={styles.carouselImage}
-                          contentFit="cover"
-                        />
-                        <BlurView
-                          intensity={90}
-                          style={styles.carouselInfo}
-                          tint={isDark ? "dark" : "light"}
-                        >
-                          <ThemedText style={styles.carouselName}>
-                            {recommendation?.user?.name || "Unknown"},{" "}
-                            {recommendation?.user?.age || 0}
+                        <ThemedText style={styles.carouselName}>
+                          {recommendation?.user?.name || "Unknown"},{" "}
+                          {recommendation?.user?.age || 0}
+                        </ThemedText>
+                        <View style={styles.locationRow}>
+                          <Ionicons name="location" size={12} color="#FF6B8B" />
+                          <ThemedText style={styles.carouselLocation}>
+                            {recommendation?.user?.location || "Unknown"} •{" "}
+                            {recommendation?.user?.distance || 0} mi
                           </ThemedText>
-                          <View style={styles.locationRow}>
-                            <Ionicons
-                              name="location"
-                              size={12}
-                              color="#FF6B8B"
-                            />
-                            <ThemedText style={styles.carouselLocation}>
-                              {recommendation?.user?.location || "Unknown"} •{" "}
-                              {recommendation?.user?.distance || 0} mi
-                            </ThemedText>
-                          </View>
-                        </BlurView>
-                        <View style={styles.matchActions}>
-                          <Pressable
-                            style={[styles.actionButton, styles.declineButton]}
-                            onPress={() =>
-                              handleUnlike(recommendation?.user?.id || 0)
-                            }
-                          >
-                            <Ionicons name="close" size={20} color="#FF5C5C" />
-                          </Pressable>
-                          <Pressable
-                            style={[styles.actionButton, styles.likeButton]}
-                            onPress={() =>
-                              handleLike(recommendation?.user?.id || 0)
-                            }
-                          >
-                            <Ionicons
-                              name={
-                                likedUserIds.includes(
-                                  recommendation?.user?.id || 0
-                                )
-                                  ? "heart"
-                                  : "heart-outline"
-                              }
-                              size={20}
-                              color={
-                                likedUserIds.includes(
-                                  recommendation?.user?.id || 0
-                                )
-                                  ? "#FF3B5C"
-                                  : "#FF6B8B"
-                              }
-                            />
-                          </Pressable>
-                          <Pressable
-                            style={[styles.actionButton, styles.removeButton]}
-                            onPress={() =>
-                              handleRemoveFromMatches(
-                                recommendation?.user?.id || 0
-                              )
-                            }
-                          >
-                            <Ionicons
-                              name="trash-outline"
-                              size={16}
-                              color="#FF5C5C"
-                            />
-                          </Pressable>
                         </View>
-                      </Pressable>
-                    ));
+                      </BlurView>
+                      <View style={styles.matchActions}>
+                        <Pressable
+                          style={[styles.actionButton, styles.removeButton]}
+                          onPress={() =>
+                            handleRemoveFromMatches(
+                              recommendation?.user?.id || 0
+                            )
+                          }
+                        >
+                          <Ionicons
+                            name="trash-outline"
+                            size={16}
+                            color="#FF5C5C"
+                          />
+                        </Pressable>
+                      </View>
+                    </Pressable>
+                  ));
                 } catch (error) {
                   console.error("Error rendering carousel:", error);
                   return null;
                 }
               })()}
-            </View>
+            </ScrollView>
           </LinearGradient>
         </View>
 
@@ -1108,7 +1087,7 @@ const styles = StyleSheet.create({
   },
   discoverActions: {
     position: "absolute",
-    top: 16,
+    bottom: 16,
     right: 16,
     flexDirection: "row",
     alignItems: "center",
