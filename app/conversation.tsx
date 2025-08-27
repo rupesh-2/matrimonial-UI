@@ -18,46 +18,11 @@ import {
   useColorScheme,
   View,
 } from "react-native";
-import { useAuthStore } from "../../modules/auth/hooks/useAuth";
-import { useMessagesStore } from "../../modules/messages/hooks/useMessages";
-import { Conversation } from "../../types/messages";
+import { useAuthStore } from "../modules/auth/hooks/useAuth";
+import { useMessagesStore } from "../modules/messages/hooks/useMessages";
+import { Conversation } from "../types/messages";
 
-// Message templates to generate random conversations
-const messageTemplates = [
-  "Hey there! How's your day going?",
-  "I saw your profile and thought we might have a lot in common.",
-  "Would you like to grab coffee sometime?",
-  "What are your plans for the weekend?",
-  "I love your photos! Where was that beach picture taken?",
-  "Have you seen that new movie everyone's talking about?",
-  "I'm a big fan of hiking too! What's your favorite trail?",
-  "Just wanted to say hi and see how you're doing!",
-  "That restaurant you mentioned sounds amazing!",
-  "Thanks for the recommendation, I'll check it out!",
-  "I'd love to hear more about your travels!",
-  "What kind of music are you into?",
-  "Do you have any pets?",
-  "I'm planning a trip next month. Any suggestions?",
-  "Your profile mentioned you like cooking. What's your specialty?",
-];
-
-// Response templates
-const responseTemplates = [
-  "I'm doing great, thanks for asking! How about you?",
-  "I'd love to meet up for coffee! When are you free?",
-  "That sounds wonderful! I'm free this weekend.",
-  "I took that photo in Bali last summer. Have you been?",
-  "Yes, I've seen it! What did you think of the ending?",
-  "My favorite trail is definitely Sunset Ridge. The views are amazing!",
-  "I'm doing well! Just busy with work this week.",
-  "I'd recommend trying the pasta there, it's incredible!",
-  "I'm really into indie rock and jazz. What about you?",
-  "Yes, I have a golden retriever named Max. He's the best!",
-  "You should definitely visit Portugal if you haven't been!",
-  "I make a mean lasagna! What do you like to cook?",
-];
-
-export default function ChatList() {
+export default function ConversationScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const [searchQuery, setSearchQuery] = useState("");
@@ -71,16 +36,9 @@ export default function ChatList() {
   useEffect(() => {
     console.log("🔍 Loading conversations...");
     getConversations(1).catch(() => {
-      // If API fails, we'll show empty state
       console.log("API not available, showing empty conversations");
     });
   }, []);
-
-  // Debug: Log conversations when they change
-  useEffect(() => {
-    console.log("🔍 Conversations updated:", conversations);
-    console.log("🔍 Number of conversations:", conversations?.length || 0);
-  }, [conversations]);
 
   const handleRefresh = () => {
     refresh();
@@ -98,19 +56,13 @@ export default function ChatList() {
     ? conversations
     : [];
 
-  // Debug: Log filtered chats
-  console.log("🔍 Filtered chats:", filteredChats);
-  console.log("🔍 Filtered chats length:", filteredChats?.length || 0);
-
   // Format timestamp
   const formatTimestamp = (timestamp: string) => {
     if (!timestamp) return "";
 
     const date = new Date(timestamp);
     const now = new Date();
-    const diffDays = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
-    );
+    const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
 
     if (diffDays === 0) {
       return date.toLocaleTimeString([], {
@@ -142,26 +94,17 @@ export default function ChatList() {
     }
 
     console.log("✅ Navigating to chat with user:", conversation.user.name);
-    console.log("✅ User data being passed:", conversation.user);
 
     try {
-      console.log("🔍 Attempting navigation...");
-
-      // Use router.navigate for better compatibility with tab navigation
       router.navigate({
         pathname: "/chat",
         params: {
           userData: JSON.stringify(conversation.user),
         },
       });
-
-      console.log("✅ Navigation call completed");
     } catch (error) {
       console.error("❌ Navigation error:", error);
-
-      // Fallback: try router.push
       try {
-        console.log("🔍 Trying router.push as fallback...");
         router.push({
           pathname: "/chat",
           params: {
@@ -178,8 +121,6 @@ export default function ChatList() {
   const renderChatItem = ({ item }: { item: Conversation }) => {
     try {
       const { user, last_message, unread_count } = item;
-
-      console.log("🔍 Rendering chat item for user:", user?.name);
 
       return (
         <Pressable
@@ -268,14 +209,13 @@ export default function ChatList() {
         style={styles.header}
       >
         <View style={styles.headerContent}>
-          <ThemedText style={styles.headerTitle}>Messages</ThemedText>
-
+          <Pressable style={styles.backButton} onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color="white" />
+          </Pressable>
+          <ThemedText style={styles.headerTitle}>Conversations</ThemedText>
           <View style={styles.headerActions}>
             <Pressable style={styles.headerButton} onPress={handleRefresh}>
               <Ionicons name="refresh" size={22} color="white" />
-            </Pressable>
-            <Pressable style={styles.headerButton}>
-              <Ionicons name="filter" size={22} color="white" />
             </Pressable>
             <Pressable style={styles.headerButton}>
               <MaterialIcons name="more-vert" size={22} color="white" />
@@ -370,60 +310,6 @@ export default function ChatList() {
           )}
         </View>
       )}
-
-      {/* New Message Button */}
-      <Pressable style={styles.newMessageButton}>
-        <LinearGradient
-          colors={["#FF6B8B", "#FF8E8E"]}
-          style={styles.newMessageButtonGradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-        >
-          <Ionicons name="create" size={24} color="white" />
-        </LinearGradient>
-      </Pressable>
-
-      {/* Test Navigation Button - Remove after testing */}
-      {filteredChats.length > 0 && (
-        <Pressable
-          style={[styles.newMessageButton, { bottom: 100 }]}
-          onPress={() => {
-            console.log("🔍 Test button pressed!");
-            handleChatPress(filteredChats[0]);
-          }}
-        >
-          <LinearGradient
-            colors={["#4CAF50", "#45a049"]}
-            style={styles.newMessageButtonGradient}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-          >
-            <ThemedText style={{ color: "white", fontSize: 12 }}>
-              Test Nav
-            </ThemedText>
-          </LinearGradient>
-        </Pressable>
-      )}
-
-      {/* Simple Navigation Test Button */}
-      <Pressable
-        style={[styles.newMessageButton, { bottom: 160 }]}
-        onPress={() => {
-          console.log("🔍 Simple navigation test!");
-          router.navigate("/conversation");
-        }}
-      >
-        <LinearGradient
-          colors={["#FF9800", "#F57C00"]}
-          style={styles.newMessageButtonGradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-        >
-          <ThemedText style={{ color: "white", fontSize: 12 }}>
-            Test Route
-          </ThemedText>
-        </LinearGradient>
-      </Pressable>
     </View>
   );
 }
@@ -446,10 +332,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
+  backButton: {
+    padding: 4,
+  },
   headerTitle: {
     color: "white",
     fontSize: 24,
     fontWeight: "bold",
+    flex: 1,
+    textAlign: "center",
   },
   headerActions: {
     flexDirection: "row",
@@ -598,23 +489,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#999",
     marginTop: 8,
-  },
-  newMessageButton: {
-    position: "absolute",
-    bottom: 24,
-    right: 24,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  newMessageButtonGradient: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: "center",
-    alignItems: "center",
   },
   clearButton: {
     padding: 4,

@@ -9,32 +9,51 @@ export interface Message {
   updated_at: string;
 }
 
-export interface Conversation {
+// API Response interfaces to match your Laravel backend
+export interface ApiMessage {
   id: number;
-  other_user: {
+  from_user_id: number;
+  to_user_id: number;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+  updated_at: string;
+  sender?: any;
+  recipient?: any;
+}
+
+export interface ChatHistoryResponse {
+  messages: ApiMessage[];
+  total: number;
+}
+
+export interface Conversation {
+  user: {
     id: number;
     name: string;
     age: number;
     gender: "male" | "female";
-    photos: string[];
-    is_online: boolean;
+    email: string;
+    location: string;
+    profile_picture?: string;
+    photos?: string[];
+    is_online?: boolean;
   };
   last_message: {
     id: number;
-    content: string;
-    sender_id: number;
-    created_at: string;
+    from_user_id: number;
+    to_user_id: number;
+    message: string;
     is_read: boolean;
+    created_at: string;
+    updated_at: string;
   };
   unread_count: number;
-  created_at: string;
-  updated_at: string;
 }
 
 export interface SendMessageData {
-  receiver_id: number;
-  content: string;
-  message_type?: "text" | "image" | "audio";
+  to_user_id: number;
+  message: string;
 }
 
 export interface MessagesResponse {
@@ -46,9 +65,6 @@ export interface MessagesResponse {
 }
 
 export interface ConversationsResponse {
-  data: Conversation[];
-  current_page: number;
-  last_page: number;
+  conversations: Conversation[];
   total: number;
-  per_page: number;
 }

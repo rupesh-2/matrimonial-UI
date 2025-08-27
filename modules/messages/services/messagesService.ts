@@ -2,7 +2,7 @@ import { API_ENDPOINTS } from "@constants/api";
 import apiClient from "@lib/axios";
 import {
   ConversationsResponse,
-  MessagesResponse,
+  ChatHistoryResponse,
   SendMessageData,
 } from "../../../types/messages";
 
@@ -10,25 +10,35 @@ export class MessagesService {
   static async getConversations(
     page: number = 1
   ): Promise<ConversationsResponse> {
-    const response = await apiClient.get<ConversationsResponse>(
-      `${API_ENDPOINTS.MESSAGES.CONVERSATIONS}?page=${page}`
-    );
-    return response.data;
+    try {
+      const response = await apiClient.get<ConversationsResponse>(
+        `${API_ENDPOINTS.MESSAGES.CONVERSATIONS}?page=${page}`
+      );
+      return response.data;
+    } catch (error) {
+      // If conversations endpoint doesn't exist, return empty response
+      console.log("Conversations endpoint not available, returning empty list");
+      return {
+        conversations: [],
+        total: 0,
+      };
+    }
   }
 
   static async getChatHistory(
     userId: number,
     page: number = 1
-  ): Promise<MessagesResponse> {
-    const response = await apiClient.get<MessagesResponse>(
+  ): Promise<ChatHistoryResponse> {
+    const response = await apiClient.get<ChatHistoryResponse>(
       `${API_ENDPOINTS.MESSAGES.CHAT_HISTORY(userId.toString())}?page=${page}`
     );
     return response.data;
   }
 
-  static async sendMessage(
-    data: SendMessageData
-  ): Promise<{ message: string; sent_message: any }> {
+  static async sendMessage(data: {
+    to_user_id: number;
+    message: string;
+  }): Promise<{ message: string; data: any }> {
     const response = await apiClient.post(API_ENDPOINTS.MESSAGES.SEND, data);
     return response.data;
   }

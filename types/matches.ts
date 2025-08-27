@@ -1,10 +1,22 @@
 export interface Match {
   id: number;
-  user_id: number;
-  matched_user_id: number;
-  matched_user: UserProfile;
+  name: string;
+  email: string;
+  age: number;
+  gender: "male" | "female" | "other";
+  religion?: string;
+  caste?: string;
+  income?: number;
+  education?: string;
+  location: string;
+  occupation?: string;
+  bio?: string;
+  profile_picture?: string;
+  photos?: string[];
+  distance?: number;
   created_at: string;
   updated_at: string;
+  preferences?: any;
 }
 
 export interface UserProfile {

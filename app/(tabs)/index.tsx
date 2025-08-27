@@ -6,6 +6,7 @@ import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
 import {
   Alert,
   Dimensions,
@@ -20,33 +21,44 @@ import {
 import { useAuthStore } from "../../modules/auth/hooks/useAuth";
 import { useLikesStore } from "../../modules/likes/hooks/useLikes";
 import { useMatchmakingStore } from "../../modules/matchmaking/hooks/useMatchmaking";
+import { useMatchesStore } from "../../modules/matches/hooks/useMatches";
 
 const { width } = Dimensions.get("window");
 
 export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
+  const router = useRouter();
 
   // API Integration
   const { recommendations, isLoading, error, getRecommendations, refresh } =
     useMatchmakingStore();
   const { likeUser, unlikeUser, likedUserIds } = useLikesStore();
   const { user } = useAuthStore();
+  const {
+    matches,
+    getMatches,
+    removeMatch,
+    isLoading: matchesLoading,
+  } = useMatchesStore();
 
   // State for tracking removed users
   const [removedUserIds, setRemovedUserIds] = useState<number[]>([]);
 
-  // Load recommendations on component mount
+  // Load recommendations and matches on component mount
   useEffect(() => {
-    // Only load recommendations if user is authenticated
+    // Only load data if user is authenticated
     if (user?.id) {
-      console.log("User authenticated, loading recommendations...");
+      console.log("User authenticated, loading recommendations and matches...");
       getRecommendations(10, 1).catch((error) => {
         // If API fails, we'll show empty state
         console.log("API not available, showing empty state:", error);
       });
+      getMatches(1).catch((error) => {
+        console.log("Matches API not available:", error);
+      });
     } else {
-      console.log("User not authenticated, skipping recommendations load");
+      console.log("User not authenticated, skipping data load");
     }
   }, [user?.id]);
 
@@ -135,28 +147,24 @@ export default function HomeScreen() {
     }
   };
 
-  const handleRemoveFromMatches = (userId: number) => {
-    Alert.alert(
-      "Remove from Today's Matches",
-      "Are you sure you want to remove this user from today's matches?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Remove",
-          style: "destructive",
-          onPress: () => {
-            console.log("Removing user from matches:", userId);
-
-            // Add user ID to removed list
-            setRemovedUserIds((prev) => [...prev, userId]);
-
-            Alert.alert("Success", "User removed from today's matches!", [
-              { text: "OK", style: "default" },
-            ]);
-          },
+  const handleRemoveFromMatches = async (userId: number) => {
+    Alert.alert("Remove Match", "Are you sure you want to remove this match?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Remove",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            console.log("Removing match for user ID:", userId);
+            await removeMatch(userId);
+            Alert.alert("Success", "Match removed successfully!");
+          } catch (error: any) {
+            console.error("Error removing match:", error);
+            Alert.alert("Error", "Failed to remove match. Please try again.");
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleRefresh = () => {
@@ -164,7 +172,26 @@ export default function HomeScreen() {
       // Clear removed users list when refreshing
       setRemovedUserIds([]);
       refresh();
+      // Also refresh matches
+      getMatches(1).catch((error) => {
+        console.log("Error refreshing matches:", error);
+      });
     }
+  };
+
+  const handleProfilePress = (recommendation: any) => {
+    const userData = recommendation.user;
+    const compatibilityPercentage = Math.round(
+      recommendation.compatibility_percentage
+    );
+
+    router.push({
+      pathname: "/profile-detail",
+      params: {
+        userData: JSON.stringify(userData),
+        compatibilityPercentage: compatibilityPercentage.toString(),
+      },
+    });
   };
 
   return (
@@ -320,21 +347,50 @@ export default function HomeScreen() {
             >
               {(() => {
                 try {
-                  return displayRecommendations.map((recommendation) => (
+                  // Show loading state for matches
+                  if (matchesLoading) {
+                    return (
+                      <View style={styles.loadingMatchesContainer}>
+                        <ThemedText style={styles.loadingMatchesText}>
+                          Loading matches...
+                        </ThemedText>
+                      </View>
+                    );
+                  }
+
+                  // Show empty state if no matches
+                  if (!Array.isArray(matches) || matches.length === 0) {
+                    return (
+                      <View style={styles.emptyMatchesContainer}>
+                        <ThemedText style={styles.emptyMatchesText}>
+                          No matches yet
+                        </ThemedText>
+                        <ThemedText style={styles.emptyMatchesSubtext}>
+                          Start liking profiles to get matches! 💕
+                        </ThemedText>
+                      </View>
+                    );
+                  }
+
+                  // Show actual matches
+                  return matches.map((match) => (
                     <Pressable
-                      key={recommendation?.user?.id || Math.random()}
+                      key={match.id || Math.random()}
                       style={styles.carouselItem}
+                      onPress={() =>
+                        handleProfilePress({
+                          user: match, // The match object IS the user data
+                          compatibility_percentage: 100, // Matches have 100% compatibility
+                        })
+                      }
                     >
                       <Image
                         source={{
                           uri:
-                            (recommendation?.user?.photos &&
-                              recommendation.user.photos[0]) ||
+                            (match.photos && match.photos[0]) ||
                             `https://randomuser.me/api/portraits/${
-                              recommendation?.user?.gender === "female"
-                                ? "women"
-                                : "men"
-                            }/${recommendation?.user?.id || 1}.jpg`,
+                              match.gender === "female" ? "women" : "men"
+                            }/${match.id || 1}.jpg`,
                         }}
                         style={styles.carouselImage}
                         contentFit="cover"
@@ -345,25 +401,23 @@ export default function HomeScreen() {
                         tint={isDark ? "dark" : "light"}
                       >
                         <ThemedText style={styles.carouselName}>
-                          {recommendation?.user?.name || "Unknown"},{" "}
-                          {recommendation?.user?.age || 0}
+                          {match.name || "Unknown"}, {match.age || 0}
                         </ThemedText>
                         <View style={styles.locationRow}>
                           <Ionicons name="location" size={12} color="#FF6B8B" />
                           <ThemedText style={styles.carouselLocation}>
-                            {recommendation?.user?.location || "Unknown"} •{" "}
-                            {recommendation?.user?.distance || 0} mi
+                            {match.location || "Unknown"} •{" "}
+                            {match.distance || 0} mi
                           </ThemedText>
                         </View>
                       </BlurView>
                       <View style={styles.matchActions}>
                         <Pressable
                           style={[styles.actionButton, styles.removeButton]}
-                          onPress={() =>
-                            handleRemoveFromMatches(
-                              recommendation?.user?.id || 0
-                            )
-                          }
+                          onPress={(e) => {
+                            e.stopPropagation(); // Prevent triggering parent Pressable
+                            handleRemoveFromMatches(match.id || 0);
+                          }}
                         >
                           <Ionicons
                             name="trash-outline"
@@ -375,8 +429,14 @@ export default function HomeScreen() {
                     </Pressable>
                   ));
                 } catch (error) {
-                  console.error("Error rendering carousel:", error);
-                  return null;
+                  console.error("Error rendering matches carousel:", error);
+                  return (
+                    <View style={styles.errorMatchesContainer}>
+                      <ThemedText style={styles.errorMatchesText}>
+                        Error loading matches
+                      </ThemedText>
+                    </View>
+                  );
                 }
               })()}
             </ScrollView>
@@ -452,6 +512,7 @@ export default function HomeScreen() {
                   <Pressable
                     key={recommendation?.user?.id || Math.random()}
                     style={styles.discoverCard}
+                    onPress={() => handleProfilePress(recommendation)}
                   >
                     <Image
                       source={{
@@ -526,7 +587,8 @@ export default function HomeScreen() {
                             recommendation?.user?.id || 0
                           ) && styles.discoverActionButtonLiked,
                         ]}
-                        onPress={() => {
+                        onPress={(e) => {
+                          e.stopPropagation(); // Prevent triggering parent Pressable
                           const userId = recommendation?.user?.id;
                           console.log("Like button pressed for user:", {
                             userId,
@@ -1132,5 +1194,46 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 10,
     fontWeight: "700",
+  },
+  // Matches-specific styles
+  loadingMatchesContainer: {
+    padding: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: 200,
+  },
+  loadingMatchesText: {
+    fontSize: 16,
+    color: "#666",
+    fontWeight: "500",
+  },
+  emptyMatchesContainer: {
+    padding: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: 200,
+  },
+  emptyMatchesText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#666",
+    marginBottom: 8,
+  },
+  emptyMatchesSubtext: {
+    fontSize: 14,
+    color: "#999",
+    textAlign: "center",
+    fontWeight: "500",
+  },
+  errorMatchesContainer: {
+    padding: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: 200,
+  },
+  errorMatchesText: {
+    fontSize: 16,
+    color: "#C62828",
+    fontWeight: "500",
   },
 });

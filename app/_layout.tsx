@@ -28,6 +28,9 @@ export default function RootLayout() {
         <Stack initialRouteName="(auth)">
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                        <Stack.Screen name="chat" options={{ headerShown: false }} />
+              <Stack.Screen name="conversation" options={{ headerShown: false }} />
+              <Stack.Screen name="profile-detail" options={{ headerShown: false }} />
           <Stack.Screen name="+not-found" />
         </Stack>
         <StatusBar style="auto" />

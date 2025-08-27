@@ -1,5 +1,5 @@
 import { HapticTab } from "@/components/HapticTab";
-import { IconSymbol } from "@/components/ui/IconSymbol";
+import { Ionicons } from "@expo/vector-icons";
 import TabBarBackground from "@/components/ui/TabBarBackground";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
@@ -64,35 +64,35 @@ export default function TabLayout() {
         options={{
           title: "Home",
           tabBarIcon: ({ color, focused }) => (
-            <IconSymbol
+            <Ionicons
               size={28}
-              name={focused ? "house.fill" : "house"}
+              name={focused ? "home" : "home-outline"}
               color={color}
             />
           ),
         }}
       />
       <Tabs.Screen
-        name="messages"
+        name="chat"
         options={{
-          title: "Messages",
+          title: "Chat",
           tabBarIcon: ({ color, focused }) => (
-            <IconSymbol
+            <Ionicons
               size={28}
-              name={focused ? "paperplane.fill" : "paperplane"}
+              name={focused ? "chatbubbles" : "chatbubbles-outline"}
               color={color}
             />
           ),
         }}
       />
       <Tabs.Screen
-        name="notifications"
+        name="notification"
         options={{
           title: "Notifications",
           tabBarIcon: ({ color, focused }) => (
-            <IconSymbol
+            <Ionicons
               size={28}
-              name={focused ? "bell.fill" : "bell"}
+              name={focused ? "notifications" : "notifications-outline"}
               color={color}
             />
           ),
@@ -103,9 +103,9 @@ export default function TabLayout() {
         options={{
           title: "Settings",
           tabBarIcon: ({ color, focused }) => (
-            <IconSymbol
+            <Ionicons
               size={28}
-              name={focused ? "gearshape.fill" : "gearshape"}
+              name={focused ? "settings" : "settings-outline"}
               color={color}
             />
           ),

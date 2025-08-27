@@ -1,13 +1,16 @@
 import { ThemedText } from "@/components/ThemedText";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View, useColorScheme } from "react-native";
 import { useAuthStore } from "../../modules/auth/hooks/useAuth";
 
 export default function SettingScreen() {
-  const { logout } = useAuthStore();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+  const { user, logout } = useAuthStore();
 
   const handleLogout = async () => {
     try {
@@ -16,6 +19,30 @@ export default function SettingScreen() {
     } catch (error) {
       console.error("Logout error:", error);
     }
+  };
+
+  const handleEditProfile = () => {
+    router.push("/profile-edit");
+  };
+
+  const handleNotifications = () => {
+    router.push("/notifications-settings");
+  };
+
+  const handlePrivacy = () => {
+    router.push("/privacy-settings");
+  };
+
+  const handleHelpSupport = () => {
+    router.push("/help-support");
+  };
+
+  const handleTermsOfService = () => {
+    router.push("/terms-of-service");
+  };
+
+  const handlePrivacyPolicy = () => {
+    router.push("/privacy-policy");
   };
 
   return (
@@ -32,53 +59,85 @@ export default function SettingScreen() {
       </LinearGradient>
 
       <ScrollView style={styles.content}>
-        <View style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>Account</ThemedText>
+        {/* Profile Section */}
+        <View style={[styles.profileSection, isDark && styles.profileSectionDark]}>
+          <View style={styles.profileHeader}>
+            <Image
+              source={{
+                uri:
+                  user?.profile_picture ||
+                  user?.photos?.[0] ||
+                  `https://randomuser.me/api/portraits/${
+                    user?.gender === "female" ? "women" : "men"
+                  }/${user?.id || 1}.jpg`,
+              }}
+              style={styles.profileImage}
+              contentFit="cover"
+            />
+            <View style={styles.profileInfo}>
+              <ThemedText style={styles.profileName}>
+                {user?.name || "User Name"}
+              </ThemedText>
+              <ThemedText style={styles.profileEmail}>
+                {user?.email || "user@example.com"}
+              </ThemedText>
+              <ThemedText style={styles.profileLocation}>
+                {user?.location || "Location not set"}
+              </ThemedText>
+            </View>
+            <Pressable style={styles.editButton} onPress={handleEditProfile}>
+              <Ionicons name="create-outline" size={20} color="#FF6B8B" />
+            </Pressable>
+          </View>
+        </View>
 
-          <Pressable style={styles.settingItem}>
-            <Ionicons name="person-outline" size={24} color="#666" />
-            <ThemedText style={styles.settingText}>Edit Profile</ThemedText>
-            <Ionicons name="chevron-forward" size={20} color="#ccc" />
+        <View style={[styles.section, isDark && styles.sectionDark]}>
+          <ThemedText style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>Account</ThemedText>
+
+          <Pressable style={[styles.settingItem, isDark && styles.settingItemDark]} onPress={handleEditProfile}>
+            <Ionicons name="person-outline" size={24} color={isDark ? "#ccc" : "#666"} />
+            <ThemedText style={[styles.settingText, isDark && styles.settingTextDark]}>Edit Profile</ThemedText>
+            <Ionicons name="chevron-forward" size={20} color={isDark ? "#666" : "#ccc"} />
           </Pressable>
 
-          <Pressable style={styles.settingItem}>
-            <Ionicons name="notifications-outline" size={24} color="#666" />
-            <ThemedText style={styles.settingText}>Notifications</ThemedText>
-            <Ionicons name="chevron-forward" size={20} color="#ccc" />
+          <Pressable style={[styles.settingItem, isDark && styles.settingItemDark]} onPress={handleNotifications}>
+            <Ionicons name="notifications-outline" size={24} color={isDark ? "#ccc" : "#666"} />
+            <ThemedText style={[styles.settingText, isDark && styles.settingTextDark]}>Notifications</ThemedText>
+            <Ionicons name="chevron-forward" size={20} color={isDark ? "#666" : "#ccc"} />
           </Pressable>
 
-          <Pressable style={styles.settingItem}>
-            <Ionicons name="shield-outline" size={24} color="#666" />
-            <ThemedText style={styles.settingText}>Privacy</ThemedText>
-            <Ionicons name="chevron-forward" size={20} color="#ccc" />
+          <Pressable style={[styles.settingItem, isDark && styles.settingItemDark]} onPress={handlePrivacy}>
+            <Ionicons name="shield-outline" size={24} color={isDark ? "#ccc" : "#666"} />
+            <ThemedText style={[styles.settingText, isDark && styles.settingTextDark]}>Privacy</ThemedText>
+            <Ionicons name="chevron-forward" size={20} color={isDark ? "#666" : "#ccc"} />
           </Pressable>
         </View>
 
-        <View style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>Support</ThemedText>
+        <View style={[styles.section, isDark && styles.sectionDark]}>
+          <ThemedText style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>Support</ThemedText>
 
-          <Pressable style={styles.settingItem}>
-            <Ionicons name="help-circle-outline" size={24} color="#666" />
-            <ThemedText style={styles.settingText}>Help & Support</ThemedText>
-            <Ionicons name="chevron-forward" size={20} color="#ccc" />
+          <Pressable style={[styles.settingItem, isDark && styles.settingItemDark]} onPress={handleHelpSupport}>
+            <Ionicons name="help-circle-outline" size={24} color={isDark ? "#ccc" : "#666"} />
+            <ThemedText style={[styles.settingText, isDark && styles.settingTextDark]}>Help & Support</ThemedText>
+            <Ionicons name="chevron-forward" size={20} color={isDark ? "#666" : "#ccc"} />
           </Pressable>
 
-          <Pressable style={styles.settingItem}>
-            <Ionicons name="document-text-outline" size={24} color="#666" />
-            <ThemedText style={styles.settingText}>Terms of Service</ThemedText>
-            <Ionicons name="chevron-forward" size={20} color="#ccc" />
+          <Pressable style={[styles.settingItem, isDark && styles.settingItemDark]} onPress={handleTermsOfService}>
+            <Ionicons name="document-text-outline" size={24} color={isDark ? "#ccc" : "#666"} />
+            <ThemedText style={[styles.settingText, isDark && styles.settingTextDark]}>Terms of Service</ThemedText>
+            <Ionicons name="chevron-forward" size={20} color={isDark ? "#666" : "#ccc"} />
           </Pressable>
 
-          <Pressable style={styles.settingItem}>
-            <Ionicons name="lock-closed-outline" size={24} color="#666" />
-            <ThemedText style={styles.settingText}>Privacy Policy</ThemedText>
-            <Ionicons name="chevron-forward" size={20} color="#ccc" />
+          <Pressable style={[styles.settingItem, isDark && styles.settingItemDark]} onPress={handlePrivacyPolicy}>
+            <Ionicons name="lock-closed-outline" size={24} color={isDark ? "#ccc" : "#666"} />
+            <ThemedText style={[styles.settingText, isDark && styles.settingTextDark]}>Privacy Policy</ThemedText>
+            <Ionicons name="chevron-forward" size={20} color={isDark ? "#666" : "#ccc"} />
           </Pressable>
         </View>
 
-        <View style={styles.section}>
+        <View style={[styles.section, isDark && styles.sectionDark]}>
           <Pressable
-            style={[styles.settingItem, styles.logoutItem]}
+            style={[styles.settingItem, styles.logoutItem, isDark && styles.settingItemDark]}
             onPress={handleLogout}
           >
             <Ionicons name="log-out-outline" size={24} color="#FF6B8B" />
